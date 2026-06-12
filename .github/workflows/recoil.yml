@@ -1,0 +1,44 @@
+# Recoil regression gate as a real CI check.
+# The gate exits 1 on BLOCK, which fails the job and blocks the PR — exactly
+# like any other failing check. RECOIL_DEMO_MODE serves cached verdicts so CI
+# needs no model API key; set ANTHROPIC_API_KEY in repo secrets and flip
+# RECOIL_DEMO_MODE to "false" to judge live on every PR instead.
+name: recoil-gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: "Candidate agent version label"
+        default: "v_fixed"
+        required: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    env:
+      RECOIL_DEMO_MODE: "true"
+      RECOIL_JUDGE_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Recoil
+        run: pip install -e ".[dev]"
+
+      - name: Unit tests (gate logic is the product)
+        run: pytest -q
+
+      - name: Seed demo state
+        run: python -m recoil.cli reset --demo
+
+      - name: Headless demo assertion
+        run: python -m recoil.cli demo-check
+
+      - name: Regression gate (blocks the PR on BLOCK)
+        run: python -m recoil.cli gate --candidate "${{ github.event.inputs.candidate || 'v_fixed' }}"

@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Recoil design tokens — "mission control".
+   Near-black layered surfaces, one confident indigo accent, semantic verdict
+   colors (green=PASS, red=BLOCK, amber=warn). OKLCH, defined once, never
+   inline-hexed in components.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg: oklch(0.145 0.004 280);            /* ~#0A0A0B */
+  --surface-1: oklch(0.185 0.005 280);
+  --surface-2: oklch(0.225 0.006 280);
+  --surface-3: oklch(0.27 0.008 280);
+  --border: oklch(0.30 0.008 280);
+  --border-strong: oklch(0.38 0.01 280);
+
+  --text-1: oklch(0.93 0.004 280);
+  --text-2: oklch(0.72 0.008 280);
+  --text-3: oklch(0.55 0.01 280);
+
+  --accent: oklch(0.62 0.19 277);          /* confident indigo */
+  --accent-soft: oklch(0.62 0.19 277 / 14%);
+  --accent-text: oklch(0.78 0.13 277);
+
+  --pass: oklch(0.72 0.17 152);            /* PASS green */
+  --pass-soft: oklch(0.72 0.17 152 / 13%);
+  --block: oklch(0.64 0.22 25);            /* BLOCK red */
+  --block-soft: oklch(0.64 0.22 25 / 14%);
+  --warn: oklch(0.78 0.15 80);             /* amber */
+  --warn-soft: oklch(0.78 0.15 80 / 13%);
+
+  --radius: 8px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-pass: var(--pass);
+  --color-pass-soft: var(--pass-soft);
+  --color-block: var(--block);
+  --color-block-soft: var(--block-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+
+  --radius-md: var(--radius);
+}
+
+html {
+  background: var(--bg);
+  color: var(--text-1);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+* {
+  border-color: var(--border);
+}
+
+/* thin scrollbars befitting a control plane */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 5px; border: 2px solid var(--bg); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes recoil-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.animate-soft-pulse {
+  animation: recoil-pulse 1.6s ease-in-out infinite;
+}

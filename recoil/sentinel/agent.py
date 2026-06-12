@@ -1,0 +1,192 @@
+"""The Sentinel intel agent: a REAL Anthropic agent that analyzes a live
+market snapshot and produces a structured, citable report — plus the
+deterministic verifier that grades every numeric claim against the snapshot
+(the ground truth) before anything is allowed to publish.
+
+Anti-hallucination design:
+- The model sees ONLY the snapshot metrics and may only reference their keys.
+- Every finding must list the metric keys it relies on and echo the exact
+  values it used; the verifier rejects unknown keys and out-of-tolerance values.
+- Citations are attached deterministically from the snapshot, never invented.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from typing import Any, Literal, Optional
+
+from pydantic import BaseModel, Field
+
+from .. import config
+
+AGENT_SYSTEM_PROMPT = """You are Recoil Sentinel, an autonomous crypto market-intelligence
+analyst. You write precise, grounded intelligence briefs for engineers and traders.
+
+HARD RULES (violations are rejected by an automated verifier):
+1. You may ONLY make quantitative claims using the metrics provided in the snapshot.
+2. Every finding must list the exact metric keys it relies on in `metric_keys`, and echo
+   the exact numeric values you used in `claimed_values` (key -> value, copied verbatim
+   from the snapshot — do not round there; round only in prose).
+3. Never invent protocols, prices, events, or news that are not in the snapshot.
+4. Be analytical, not promotional. Note risks. If the data is unremarkable, say so.
+5. 3 to 5 findings. Each body is 1-3 sentences.
+"""
+
+
+class Finding(BaseModel):
+    headline: str
+    body: str
+    metric_keys: list[str] = Field(min_length=1)
+    claimed_values: dict[str, float]
+    signal: Literal["bullish", "bearish", "neutral", "risk"]
+
+
+class IntelReport(BaseModel):
+    title: str
+    executive_summary: str
+    findings: list[Finding] = Field(min_length=3, max_length=5)
+    risk_flags: list[str]
+    confidence: Literal["low", "medium", "high"]
+
+
+class ClaimCheck(BaseModel):
+    finding_index: int
+    metric_key: str
+    claimed: Optional[float]
+    observed: Optional[float]
+    ok: bool
+    problem: str = ""
+
+
+class VerificationResult(BaseModel):
+    passed: bool
+    checks: list[ClaimCheck]
+    problems: list[str]
+
+
+class SentinelError(Exception):
+    pass
+
+
+def generate_report(snapshot: dict[str, Any]) -> tuple[IntelReport, dict[str, Any]]:
+    """Live model call. Returns (report, llm_stats). Raises SentinelError on failure —
+    Phase A is the real path; there is deliberately NO mock fallback here."""
+    if not config.ANTHROPIC_API_KEY:
+        raise SentinelError("ANTHROPIC_API_KEY required: Sentinel runs on the live model only")
+    try:
+        import anthropic
+    except ImportError as exc:
+        raise SentinelError("anthropic SDK not installed (pip install anthropic)") from exc
+
+    compact = {
+        k: {
+            "label": m["label"],
+            "value": m["value"],
+            "unit": m["unit"],
+            **{ek: ev for ek, ev in (m.get("extra") or {}).items() if ev is not None},
+        }
+        for k, m in snapshot["metrics"].items()
+    }
+    client = anthropic.Anthropic(
+        api_key=config.ANTHROPIC_API_KEY,
+        timeout=max(config.EXTERNAL_TIMEOUT_S, 60),
+        max_retries=config.EXTERNAL_RETRIES,
+    )
+    t0 = time.perf_counter()
+    response = client.messages.parse(
+        model=config.AGENT_MODEL,
+        max_tokens=2500,
+        system=AGENT_SYSTEM_PROMPT,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Live market snapshot fetched at {snapshot['fetched_at']} "
+                    "(metric key -> data):\n"
+                    + json.dumps(compact, indent=1, sort_keys=True)
+                    + "\n\nWrite the intelligence brief now."
+                ),
+            }
+        ],
+        output_format=IntelReport,
+    )
+    latency_ms = (time.perf_counter() - t0) * 1000
+    report = response.parsed_output
+    if report is None:
+        raise SentinelError("model returned unparseable report")
+    usage = response.usage
+    # claude-sonnet-4-6 pricing: $3/M input, $15/M output
+    cost = usage.input_tokens * 3e-6 + usage.output_tokens * 15e-6
+    return report, {
+        "model": config.AGENT_MODEL,
+        "latency_ms": round(latency_ms, 1),
+        "prompt_tokens": usage.input_tokens,
+        "completion_tokens": usage.output_tokens,
+        "cost_usd": round(cost, 6),
+    }
+
+
+# relative tolerance for echoed values (allows benign float/rounding drift)
+_TOLERANCE = 0.01
+
+
+def verify_report(report: IntelReport, snapshot: dict[str, Any]) -> VerificationResult:
+    """Grade every numeric claim against the ground-truth snapshot. Deterministic."""
+    metrics = snapshot["metrics"]
+    checks: list[ClaimCheck] = []
+    problems: list[str] = []
+
+    for i, finding in enumerate(report.findings):
+        for key in finding.metric_keys:
+            if key not in metrics:
+                checks.append(
+                    ClaimCheck(
+                        finding_index=i,
+                        metric_key=key,
+                        claimed=finding.claimed_values.get(key),
+                        observed=None,
+                        ok=False,
+                        problem=f"finding {i} cites unknown metric {key!r} (hallucinated source)",
+                    )
+                )
+                problems.append(checks[-1].problem)
+                continue
+            observed = float(metrics[key]["value"])
+            claimed = finding.claimed_values.get(key)
+            if claimed is None:
+                # cited but no numeric claim echoed — allowed (qualitative reference)
+                checks.append(
+                    ClaimCheck(finding_index=i, metric_key=key, claimed=None, observed=observed, ok=True)
+                )
+                continue
+            denom = max(abs(observed), 1e-9)
+            ok = abs(float(claimed) - observed) / denom <= _TOLERANCE or abs(float(claimed) - observed) <= 0.05
+            check = ClaimCheck(
+                finding_index=i,
+                metric_key=key,
+                claimed=float(claimed),
+                observed=observed,
+                ok=ok,
+                problem=""
+                if ok
+                else f"finding {i} claims {key}={claimed} but ground truth is {observed}",
+            )
+            checks.append(check)
+            if not ok:
+                problems.append(check.problem)
+        for key in finding.claimed_values:
+            if key not in finding.metric_keys:
+                problems.append(f"finding {i} has claimed value for unlisted metric {key!r}")
+                checks.append(
+                    ClaimCheck(
+                        finding_index=i,
+                        metric_key=key,
+                        claimed=finding.claimed_values[key],
+                        observed=None,
+                        ok=False,
+                        problem=problems[-1],
+                    )
+                )
+
+    return VerificationResult(passed=not problems, checks=checks, problems=problems)

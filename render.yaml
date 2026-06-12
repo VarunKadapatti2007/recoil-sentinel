@@ -1,0 +1,60 @@
+# Render blueprint — Recoil Sentinel, always-on autonomous deploy (Phase G).
+# Deploy: push this repo to GitHub -> Render dashboard -> New + Blueprint.
+# Set ANTHROPIC_API_KEY in the Render dashboard (never commit it).
+#
+# Two services:
+#   1. recoil-api  — serves /cited.md (the public artifact), the dashboard API,
+#                    and the sentinel status endpoints.
+#   2. recoil-sentinel-cron — runs `recoil sentinel` on a schedule, fully
+#                    autonomously: replay-gate -> live data -> live model ->
+#                    verify -> publish. No human in the loop.
+#
+# NOTE: services share state via the persistent disk mounted at /data
+# (RECOIL_DATA_DIR). cited.md is written into /data as well so the API can
+# serve the cron's output.
+
+services:
+  - type: web
+    name: recoil-api
+    runtime: python
+    plan: starter
+    buildCommand: pip install -e ".[anthropic]"
+    startCommand: python -m uvicorn server.main:app --host 0.0.0.0 --port $PORT
+    disk:
+      name: recoil-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: RECOIL_DATA_DIR
+        value: /data
+      - key: RECOIL_JUDGE_PROVIDER
+        value: anthropic
+      - key: ANTHROPIC_API_KEY
+        sync: false # set in dashboard
+      - key: RECOIL_DEMO_MODE
+        value: "false"
+      - key: RECOIL_CITED_PATH
+        value: /data/cited.md
+
+  - type: cron
+    name: recoil-sentinel-cron
+    runtime: python
+    plan: starter
+    schedule: "0 */6 * * *" # every 6 hours — autonomous, no manual trigger
+    buildCommand: pip install -e ".[anthropic]"
+    startCommand: python -m recoil.cli sentinel
+    disk:
+      name: recoil-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: RECOIL_DATA_DIR
+        value: /data
+      - key: RECOIL_JUDGE_PROVIDER
+        value: anthropic
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RECOIL_DEMO_MODE
+        value: "false"
+      - key: RECOIL_CITED_PATH
+        value: /data/cited.md

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recoil"
+version = "0.1.0"
+description = "Recoil — CI/CD for AI agents: a regression-eval harness and publish gate."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.8",
+    "typer>=0.12",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+bedrock = ["anthropic[bedrock]>=0.40"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+recoil = "recoil.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["recoil*", "server*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
