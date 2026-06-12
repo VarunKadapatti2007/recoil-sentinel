@@ -455,10 +455,19 @@ def _sentinel_once(
                 airbyte_ground_truth_check,
                 clickhouse_record_run,
                 composio_publish_action,
+                senso_publish_citeable,
             )
 
             ok_claims = sum(1 for c in verification.checks if c.ok)
             print(" [5/5] sponsor integrations:")
+            print(
+                "        senso→cited.md: "
+                + senso_publish_citeable(
+                    title=report.title,
+                    summary=report.executive_summary,
+                    markdown=_Path(result["path"]).read_text(encoding="utf-8"),
+                )
+            )
             print(
                 "        clickhouse: "
                 + clickhouse_record_run(

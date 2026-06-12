@@ -639,7 +639,9 @@ def sentinel_run(
         airbyte_ground_truth_check,
         clickhouse_record_run,
         composio_publish_action,
+        senso_publish_citeable,
     )
+    from recoil.sentinel.publish import CITED_MD_PATH
     from recoil.sentinel.sources import SourceError
 
     conn = _conn()
@@ -669,6 +671,11 @@ def sentinel_run(
         ok = sum(1 for c in verification.checks if c.ok)
         integrations: dict[str, str] = {}
         if result["published"]:
+            integrations["senso_cited_md"] = senso_publish_citeable(
+                title=report.title,
+                summary=report.executive_summary,
+                markdown=CITED_MD_PATH.read_text(encoding="utf-8"),
+            )
             integrations["clickhouse"] = clickhouse_record_run(
                 run_id=result["run_id"],
                 verdict="PASS",

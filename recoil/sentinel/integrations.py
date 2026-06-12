@@ -166,6 +166,33 @@ def composio_publish_action(
 
 
 # ---------------------------------------------------------------------------
+# Senso / cited.md — publish the verified report to the agentic content layer
+# ---------------------------------------------------------------------------
+
+def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
+    """Publish a verified report to cited.md via the Senso API. Only fires after
+    the report has PASSED claim verification — so cited.md only ever receives
+    machine-verified, grounded content. Returns a status string."""
+    if not config.SENSO_API_KEY:
+        return "skipped (set SENSO_API_KEY to publish to cited.md)"
+    try:
+        resp = httpx.post(
+            f"{config.SENSO_API_BASE}/content/raw",
+            headers={"X-API-Key": config.SENSO_API_KEY, "Content-Type": "application/json"},
+            json={"title": title[:120], "summary": summary[:480], "text": markdown},
+            timeout=max(config.EXTERNAL_TIMEOUT_S, 30.0),
+        )
+        if resp.status_code in (200, 201, 202):
+            data = resp.json() if resp.content else {}
+            cid = data.get("id") or data.get("content_id") or data.get("contentId") or ""
+            return f"published to cited.md (Senso content {cid})" if cid else "published to cited.md"
+        return f"degraded (Senso {resp.status_code}: {resp.text[:160]})"
+    except Exception as exc:
+        log.warning("senso/cited.md publish degraded: %s", exc)
+        return f"degraded ({type(exc).__name__}: {exc})"
+
+
+# ---------------------------------------------------------------------------
 # Airbyte (Phase B)
 # ---------------------------------------------------------------------------
 
