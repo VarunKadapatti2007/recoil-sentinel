@@ -65,6 +65,24 @@
 
 ## Changelog
 
+### 2026-06-12 — REAL cited.md publishing via Senso (eligibility requirement)
+
+DISCOVERY: "cited.md" in the hackathon is a REAL platform (cited.md, powered by Senso.ai —
+also a sponsor), NOT just a repo file. Publishing a local cited.md file does NOT satisfy the
+"publish your agent's output to cited.md" requirement. Verified the Senso API from docs/search:
+POST https://sdk.senso.ai/api/v1/content/raw, header X-API-Key, body {title, summary, text},
+returns 202 with id. Built `senso_publish_citeable()` in integrations.py — fires only AFTER a
+report PASSES verification (cited.md only receives machine-verified content). Wired into both
+the CLI [5/5] block and POST /api/sentinel/run (integrations.senso_cited_md). Config:
+SENSO_API_KEY + SENSO_API_BASE; added to .env/.env.example/render.yaml. Graceful no-op without
+key (verified). pytest 22/22.
+ACTION REQUIRED (user): get a SENSO_API_KEY at senso.ai/docs.senso.ai, put it in .env (and
+Render dashboard), then do ONE live `recoil sentinel` run to confirm a real 202 + content id
+(the end-to-end publish to cited.md could NOT be confirmed without the key — the API
+field names came from docs/search, not a verified live call; the code logs the raw Senso
+response and degrades gracefully if a field differs). NOTE: also strengthens "Best Use of
+Senso.ai" prize.
+
 ### 2026-06-12 — Verification Console UI (the presentation layer judges see)
 
 New dashboard page `web/app/verify/page.tsx` (nav "Verify (live)") — a chat-style console
