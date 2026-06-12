@@ -176,18 +176,43 @@ def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
     grounded content. Returns a status string with the Senso content id."""
     if not config.SENSO_API_KEY:
         return "skipped (set SENSO_API_KEY to publish to cited.md)"
+    headers = {"X-API-Key": config.SENSO_API_KEY, "Content-Type": "application/json"}
     try:
+        # Preferred path: publish a LIVE article on the public cited.md page via the
+        # content engine (needs a GEO question id + the Cited.md publisher id).
+        if config.SENSO_GEO_QUESTION_ID and config.SENSO_PUBLISHER_ID:
+            resp = httpx.post(
+                f"{config.SENSO_API_BASE}/org/content-engine/publish",
+                headers=headers,
+                json={
+                    "geo_question_id": config.SENSO_GEO_QUESTION_ID,
+                    "raw_markdown": markdown,
+                    "seo_title": title[:110],
+                    "summary": summary[:480],
+                    "publisher_ids": [config.SENSO_PUBLISHER_ID],
+                },
+                timeout=max(config.EXTERNAL_TIMEOUT_S, 45.0),
+            )
+            if resp.status_code in (200, 201):
+                data = resp.json() if resp.content else {}
+                dests = data.get("publish_destinations") or []
+                url = dests[0].get("display_url") if dests else ""
+                if data.get("publish_status") == "success" and url:
+                    return f"published LIVE to cited.md: {url}"
+                return f"published to cited.md ({data.get('publish_status', 'queued')})"
+            log.warning("senso engine publish %s: %s — falling back to KB", resp.status_code, resp.text[:160])
+
+        # Fallback: ingest into the org knowledge base (still real Senso usage).
         resp = httpx.post(
             f"{config.SENSO_API_BASE}/org/kb/raw",
-            headers={"X-API-Key": config.SENSO_API_KEY, "Content-Type": "application/json"},
+            headers=headers,
             json={"title": title[:120], "summary": summary[:480], "text": markdown},
             timeout=max(config.EXTERNAL_TIMEOUT_S, 30.0),
         )
         if resp.status_code in (200, 201, 202):
             data = resp.json() if resp.content else {}
             cid = data.get("id") or data.get("content_id") or ""
-            status = data.get("processing_status", "queued")
-            return f"published to cited.md via Senso (content {cid}, {status})"
+            return f"ingested into Senso KB (content {cid}; set SENSO_GEO_QUESTION_ID for live cited.md)"
         return f"degraded (Senso {resp.status_code}: {resp.text[:160]})"
     except Exception as exc:
         log.warning("senso/cited.md publish degraded: %s", exc)

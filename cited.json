@@ -1,70 +1,67 @@
 {
-  "generated_at": "2026-06-12T22:18:01.520645+00:00",
+  "generated_at": "2026-06-12T23:01:47.618734+00:00",
   "llm": {
-    "completion_tokens": 1314,
-    "cost_usd": 0.027243,
-    "latency_ms": 28376.2,
+    "completion_tokens": 1117,
+    "cost_usd": 0.024294,
+    "latency_ms": 23256.8,
     "model": "claude-sonnet-4-6",
-    "prompt_tokens": 2511
+    "prompt_tokens": 2513
   },
   "report": {
     "confidence": "medium",
-    "executive_summary": "Major crypto assets are marginally lower across the board over the past 24 hours, with Bitcoin nearly flat and Ethereum and Solana posting modest declines. DeFi protocol TVLs tell a more constructive story: lending and staking protocols show meaningful 7-day gains, and Ethereum retains dominant chain TVL at over $37.6B. No dramatic dislocations are present; the environment is one of mild risk-off price action against a backdrop of steady-to-growing on-chain capital deployment.",
+    "executive_summary": "Markets are broadly flat to slightly negative across the major assets. Bitcoin holds just above $63,400 with a negligible 24h gain, while Ethereum and Solana post modest declines. DeFi TVL on Ethereum remains dominant at ~$37.6B, and leading lending and staking protocols show mild weekly growth. No dramatic price dislocations or protocol-level anomalies are present in this snapshot; the overall picture is one of low-volatility consolidation with stable DeFi participation.",
     "findings": [
       {
-        "body": "Bitcoin is essentially unchanged at -0.16% over 24 hours, trading at $63,481, while Ethereum fell -0.98% to $1,663.14 and Solana dropped -0.60% to $66.56. The divergence, though small, suggests Ethereum is underperforming relative to Bitcoin on a short-term basis. Market cap spreads remain wide: Bitcoin at ~$1.27T dwarfs Ethereum at ~$200.7B and Solana at ~$38.6B.",
+        "body": "Bitcoin is trading at $63,475.00, up just 0.19% in 24 hours, while Ethereum sits at $1,661.62 (-0.57%) and Solana at $66.58 (-0.42%). The divergence is minor but consistent, with BTC showing relative strength against both large-cap altcoins in this window.",
         "claimed_values": {},
-        "headline": "Bitcoin Flat; Ethereum and Solana Softer on 24-Hour Basis",
+        "headline": "Bitcoin Marginally Positive While ETH and SOL Drift Lower",
         "metric_keys": [
-          "change24h:bitcoin",
-          "change24h:ethereum",
-          "change24h:solana",
           "price:bitcoin",
           "price:ethereum",
-          "price:solana"
-        ],
-        "signal": "bearish"
-      },
-      {
-        "body": "Ethereum chain TVL stands at $37,626,321,481.64, far ahead of BSC ($5,252,714,981.74), Solana ($4,685,223,682.14), Tron ($4,365,170,581.94), Bitcoin ($4,196,992,910.81), and Base ($4,014,392,145.02). This concentration underscores Ethereum's continued primacy as the settlement layer for DeFi capital, though the clustering of competing chains between $4B\u2013$5.3B suggests growing multi-chain fragmentation below the top tier.",
-        "claimed_values": {},
-        "headline": "Ethereum Chain TVL Dominates at $37.6B, Nearly 7x Nearest Competitor",
-        "metric_keys": [
-          "tvl:chain:ethereum",
-          "tvl:chain:bsc",
-          "tvl:chain:solana",
-          "tvl:chain:tron",
-          "tvl:chain:bitcoin",
-          "tvl:chain:base"
-        ],
-        "signal": "bullish"
-      },
-      {
-        "body": "Morpho Blue posted a +6.33% 7-day TVL gain to $6,632,093,252.86, while Aave V3 rose +4.79% to $11,779,654,323.24 over the same period. Both protocols also registered positive 1-day changes (+1.00% and +0.11% respectively), indicating sustained inflow rather than a single-day spike. This is a constructive signal for DeFi credit markets.",
-        "claimed_values": {},
-        "headline": "Lending Protocols Show Strong 7-Day TVL Momentum",
-        "metric_keys": [
-          "tvl:protocol:morpho-blue",
-          "tvl:protocol:aave-v3"
-        ],
-        "signal": "bullish"
-      },
-      {
-        "body": "Lido TVL sits at $14,866,016,587.71 (+4.15% 7d, -0.78% 1d) and Binance Staked ETH at $6,169,472,177.97 (+7.44% 7d, -0.78% 1d); SSV Network shows a similar pattern at $12,273,361,689.94 (+7.38% 7d, -0.78% 1d). The uniform ~0.78% single-day decline across staking protocols closely mirrors Ethereum's spot price drop of -0.98%, suggesting the TVL moves are largely price-driven rather than reflecting meaningful unstaking activity.",
-        "claimed_values": {},
-        "headline": "Liquid Staking TVL Rising Weekly Despite Daily Dip",
-        "metric_keys": [
-          "tvl:protocol:lido",
-          "tvl:protocol:binance-staked-eth",
-          "tvl:protocol:ssv-network",
-          "change24h:ethereum"
+          "price:solana",
+          "change24h:bitcoin",
+          "change24h:ethereum",
+          "change24h:solana"
         ],
         "signal": "neutral"
       },
       {
-        "body": "Ethena USDe TVL is $4,484,774,993.33, with a mild 1-day gain of +0.20% but a 7-day decline of -0.36%. As a basis-trading synthetic dollar protocol, this flat trend amid broader DeFi growth could indicate reduced demand for its yield product or tightening funding rate arbitrage conditions. Traders should monitor this as a leading indicator for risk appetite in synthetic stable markets.",
+        "body": "Ethereum chain TVL stands at $37,610,539,378.28, roughly 7.2x that of the next-largest tracked chain (BSC at $5,251,659,219.38) and dwarfing Solana's $4,683,716,915.65. This concentration underscores continued reliance on Ethereum as the primary settlement layer for DeFi capital despite its price softness.",
         "claimed_values": {},
-        "headline": "Ethena USDe TVL Flat to Slightly Negative on 7-Day View Despite Daily Uptick",
+        "headline": "Ethereum Chain TVL Commands a Dominant Lead Among Tracked Chains",
+        "metric_keys": [
+          "tvl:chain:ethereum",
+          "tvl:chain:bsc",
+          "tvl:chain:solana"
+        ],
+        "signal": "bullish"
+      },
+      {
+        "body": "Morpho Blue TVL grew 6.44% over 7 days to $6,638,965,991.99, and SSV Network rose 7.38% to $12,273,361,689.94 \u2014 both outpacing Lido's 3.92% weekly gain to $14,833,227,918.95. The acceleration in Morpho Blue and SSV suggests incremental capital rotation into modular lending and decentralized staking infrastructure.",
+        "claimed_values": {},
+        "headline": "Morpho Blue and SSV Network Post Notable 7-Day TVL Gains",
+        "metric_keys": [
+          "tvl:protocol:morpho-blue",
+          "tvl:protocol:ssv-network",
+          "tvl:protocol:lido"
+        ],
+        "signal": "bullish"
+      },
+      {
+        "body": "Lido posted a -1.00% 1-day TVL change (to $14,833,227,918.95) and Binance Staked ETH fell -0.78% (to $6,169,472,177.97), consistent with ETH's 24h price decline of -0.57%. These moves are likely price-driven rather than indicative of net withdrawal pressure, but warrant monitoring if ETH continues to soften.",
+        "claimed_values": {},
+        "headline": "Lido and Binance Staked ETH Show Intraday TVL Contraction",
+        "metric_keys": [
+          "tvl:protocol:lido",
+          "tvl:protocol:binance-staked-eth",
+          "change24h:ethereum"
+        ],
+        "signal": "risk"
+      },
+      {
+        "body": "Ethena USDe TVL edged up 0.20% on the day to $4,484,774,993.33, but is down -0.36% over 7 days \u2014 the only tracked protocol in this snapshot showing a weekly TVL decline. For a basis-trading stablecoin protocol, tepid TVL growth in a low-volatility environment may reflect compressed funding-rate yields reducing deposit incentives.",
+        "claimed_values": {},
+        "headline": "Ethena USDe TVL Slightly Negative on 7-Day Basis Despite Daily Uptick",
         "metric_keys": [
           "tvl:protocol:ethena-usde"
         ],
@@ -72,16 +69,16 @@
       }
     ],
     "risk_flags": [
-      "Ethereum price decline of -0.9758% over 24h is the largest among the three tracked assets, potentially signaling rotation or relative weakness.",
-      "Uniform ~0.78% single-day TVL decline across Lido, Binance Staked ETH, and SSV Network is price-correlated but warrants monitoring if ETH continues lower.",
-      "Ethena USDe 7-day TVL contraction of -0.363% against a backdrop of broad DeFi TVL growth may indicate protocol-specific headwinds in basis trading yields.",
-      "Solana chain TVL ($4,685,223,682.14) is only ~12.5% of Ethereum chain TVL, limiting its weight as an alternative settlement layer despite competitive asset-level market cap."
+      "ETH price decline (-0.57% / 24h) is applying mild downward pressure on ETH-denominated TVL metrics across liquid staking protocols.",
+      "Ethena USDe is the sole tracked protocol with a negative 7-day TVL trend (-0.36%), suggesting potential yield compression in basis-trading strategies.",
+      "Bitcoin chain TVL ($4,195,845,261.12) nearly matches Base chain TVL ($4,014,436,411.23), an unusual proximity that may reflect speculative flows rather than organic utilization.",
+      "All three major assets are within 1% of flat on 24h basis \u2014 low volatility can precede sharp directional moves in either direction."
     ],
-    "title": "Crypto Market Intelligence Brief \u2014 2026-06-12T22:17Z"
+    "title": "Crypto Market Intelligence Brief \u2014 2026-06-12T23:01Z"
   },
-  "run_id": "89ef0023-56e3-4897-a249-7cb34d724a1b",
+  "run_id": "8d9261d8-d87b-4f1c-addb-418f3a9431ab",
   "snapshot": {
-    "fetched_at": "2026-06-12T22:17:29.400458+00:00",
+    "fetched_at": "2026-06-12T23:01:19.892257+00:00",
     "metrics": {
       "change24h:bitcoin": {
         "extra": {},
@@ -89,7 +86,7 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": -0.1592
+        "value": 0.1886
       },
       "change24h:ethereum": {
         "extra": {},
@@ -97,7 +94,7 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": -0.9758
+        "value": -0.5701
       },
       "change24h:solana": {
         "extra": {},
@@ -105,40 +102,40 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": -0.6031
+        "value": -0.4175
       },
       "price:bitcoin": {
         "extra": {
-          "change_24h_pct": -0.1591610460292252,
-          "market_cap_usd": 1272035836643.7395
+          "change_24h_pct": 0.1886460975311544,
+          "market_cap_usd": 1272148731279.7297
         },
         "label": "Bitcoin price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 63481.0
+        "value": 63475.0
       },
       "price:ethereum": {
         "extra": {
-          "change_24h_pct": -0.9757713060860502,
-          "market_cap_usd": 200697803060.58588
+          "change_24h_pct": -0.5700902981667032,
+          "market_cap_usd": 200513776995.69275
         },
         "label": "Ethereum price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 1663.14
+        "value": 1661.62
       },
       "price:solana": {
         "extra": {
-          "change_24h_pct": -0.6030575336503923,
-          "market_cap_usd": 38593732790.25826
+          "change_24h_pct": -0.4175201841316511,
+          "market_cap_usd": 38605422958.50456
         },
         "label": "Solana price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 66.56
+        "value": 66.58
       },
       "tvl:chain:base": {
         "extra": {},
@@ -146,7 +143,7 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/Base",
         "unit": "usd",
-        "value": 4014392145.02
+        "value": 4014436411.23
       },
       "tvl:chain:bitcoin": {
         "extra": {},
@@ -154,7 +151,7 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/Bitcoin",
         "unit": "usd",
-        "value": 4196992910.81
+        "value": 4195845261.12
       },
       "tvl:chain:bsc": {
         "extra": {},
@@ -162,7 +159,7 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/BSC",
         "unit": "usd",
-        "value": 5252714981.74
+        "value": 5251659219.38
       },
       "tvl:chain:ethereum": {
         "extra": {},
@@ -170,7 +167,7 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/Ethereum",
         "unit": "usd",
-        "value": 37626321481.64
+        "value": 37610539378.28
       },
       "tvl:chain:solana": {
         "extra": {},
@@ -178,7 +175,7 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/Solana",
         "unit": "usd",
-        "value": 4685223682.14
+        "value": 4683716915.65
       },
       "tvl:chain:tron": {
         "extra": {},
@@ -186,20 +183,20 @@
         "source": "DefiLlama",
         "source_url": "https://defillama.com/chain/Tron",
         "unit": "usd",
-        "value": 4365170581.94
+        "value": 4369865364.6
       },
       "tvl:protocol:aave-v3": {
         "extra": {
           "category": "Lending",
           "chain": "Multi-Chain",
-          "change_1d_pct": 0.10541134391456808,
-          "change_7d_pct": 4.792699644027593
+          "change_1d_pct": 0.030116842003025113,
+          "change_7d_pct": 1.8515397953479749
         },
         "label": "Aave V3 TVL (USD)",
         "source": "DefiLlama",
         "source_url": "https://defillama.com/protocol/aave-v3",
         "unit": "usd",
-        "value": 11779654323.24
+        "value": 11766670153.79
       },
       "tvl:protocol:binance-staked-eth": {
         "extra": {
@@ -244,27 +241,27 @@
         "extra": {
           "category": "Liquid Staking",
           "chain": "Multi-Chain",
-          "change_1d_pct": -0.7814201968375301,
-          "change_7d_pct": 4.153248760146468
+          "change_1d_pct": -1.0002579149697368,
+          "change_7d_pct": 3.9235270755593206
         },
         "label": "Lido TVL (USD)",
         "source": "DefiLlama",
         "source_url": "https://defillama.com/protocol/lido",
         "unit": "usd",
-        "value": 14866016587.71
+        "value": 14833227918.95
       },
       "tvl:protocol:morpho-blue": {
         "extra": {
           "category": "Lending",
           "chain": "Multi-Chain",
-          "change_1d_pct": 1.0007947381786693,
-          "change_7d_pct": 6.327228238181675
+          "change_1d_pct": 1.2851614370835307,
+          "change_7d_pct": 6.437413555987192
         },
         "label": "Morpho Blue TVL (USD)",
         "source": "DefiLlama",
         "source_url": "https://defillama.com/protocol/morpho-blue",
         "unit": "usd",
-        "value": 6632093252.86
+        "value": 6638965991.99
       },
       "tvl:protocol:sky-lending": {
         "extra": {
@@ -300,32 +297,8 @@
       {
         "claimed": null,
         "finding_index": 0,
-        "metric_key": "change24h:bitcoin",
-        "observed": -0.1592,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 0,
-        "metric_key": "change24h:ethereum",
-        "observed": -0.9758,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 0,
-        "metric_key": "change24h:solana",
-        "observed": -0.6031,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 0,
         "metric_key": "price:bitcoin",
-        "observed": 63481.0,
+        "observed": 63475.0,
         "ok": true,
         "problem": ""
       },
@@ -333,7 +306,7 @@
         "claimed": null,
         "finding_index": 0,
         "metric_key": "price:ethereum",
-        "observed": 1663.14,
+        "observed": 1661.62,
         "ok": true,
         "problem": ""
       },
@@ -341,7 +314,31 @@
         "claimed": null,
         "finding_index": 0,
         "metric_key": "price:solana",
-        "observed": 66.56,
+        "observed": 66.58,
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "claimed": null,
+        "finding_index": 0,
+        "metric_key": "change24h:bitcoin",
+        "observed": 0.1886,
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "claimed": null,
+        "finding_index": 0,
+        "metric_key": "change24h:ethereum",
+        "observed": -0.5701,
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "claimed": null,
+        "finding_index": 0,
+        "metric_key": "change24h:solana",
+        "observed": -0.4175,
         "ok": true,
         "problem": ""
       },
@@ -349,7 +346,7 @@
         "claimed": null,
         "finding_index": 1,
         "metric_key": "tvl:chain:ethereum",
-        "observed": 37626321481.64,
+        "observed": 37610539378.28,
         "ok": true,
         "problem": ""
       },
@@ -357,7 +354,7 @@
         "claimed": null,
         "finding_index": 1,
         "metric_key": "tvl:chain:bsc",
-        "observed": 5252714981.74,
+        "observed": 5251659219.38,
         "ok": true,
         "problem": ""
       },
@@ -365,31 +362,7 @@
         "claimed": null,
         "finding_index": 1,
         "metric_key": "tvl:chain:solana",
-        "observed": 4685223682.14,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 1,
-        "metric_key": "tvl:chain:tron",
-        "observed": 4365170581.94,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 1,
-        "metric_key": "tvl:chain:bitcoin",
-        "observed": 4196992910.81,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 1,
-        "metric_key": "tvl:chain:base",
-        "observed": 4014392145.02,
+        "observed": 4683716915.65,
         "ok": true,
         "problem": ""
       },
@@ -397,15 +370,23 @@
         "claimed": null,
         "finding_index": 2,
         "metric_key": "tvl:protocol:morpho-blue",
-        "observed": 6632093252.86,
+        "observed": 6638965991.99,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
         "finding_index": 2,
-        "metric_key": "tvl:protocol:aave-v3",
-        "observed": 11779654323.24,
+        "metric_key": "tvl:protocol:ssv-network",
+        "observed": 12273361689.94,
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "claimed": null,
+        "finding_index": 2,
+        "metric_key": "tvl:protocol:lido",
+        "observed": 14833227918.95,
         "ok": true,
         "problem": ""
       },
@@ -413,7 +394,7 @@
         "claimed": null,
         "finding_index": 3,
         "metric_key": "tvl:protocol:lido",
-        "observed": 14866016587.71,
+        "observed": 14833227918.95,
         "ok": true,
         "problem": ""
       },
@@ -428,16 +409,8 @@
       {
         "claimed": null,
         "finding_index": 3,
-        "metric_key": "tvl:protocol:ssv-network",
-        "observed": 12273361689.94,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 3,
         "metric_key": "change24h:ethereum",
-        "observed": -0.9758,
+        "observed": -0.5701,
         "ok": true,
         "problem": ""
       },

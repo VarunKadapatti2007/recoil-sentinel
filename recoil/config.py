@@ -82,6 +82,10 @@ COMPOSIO_GITHUB_REPO = os.environ.get("COMPOSIO_GITHUB_REPO", "recoil-sentinel")
 # Senso / cited.md: publish verified reports to the agentic content layer
 SENSO_API_KEY = os.environ.get("SENSO_API_KEY", "")
 SENSO_API_BASE = os.environ.get("SENSO_API_BASE", "https://apiv2.senso.ai/api/v1")
+# the shared "Cited.md" publish destination + a GEO question to anchor citeables;
+# when both are set the agent publishes LIVE articles to cited.md (else KB ingest)
+SENSO_PUBLISHER_ID = os.environ.get("SENSO_PUBLISHER_ID", "afa1052b-8226-438c-895e-335dcf21743a")
+SENSO_GEO_QUESTION_ID = os.environ.get("SENSO_GEO_QUESTION_ID", "")
 
 # ClickHouse Cloud: run/event analytics store
 CLICKHOUSE_HOST = os.environ.get("CLICKHOUSE_HOST", "")
