@@ -53,7 +53,9 @@ def _ch_query(sql: str, *, body: Optional[str] = None) -> str:
         params={"query": sql},
         content=body or b"",
         auth=(config.CLICKHOUSE_USER, config.CLICKHOUSE_PASSWORD),
-        timeout=config.EXTERNAL_TIMEOUT_S,
+        # ClickHouse Cloud idles between runs; waking can exceed the default
+        # external timeout, so give this integration a longer leash.
+        timeout=max(config.EXTERNAL_TIMEOUT_S, 60.0),
     )
     resp.raise_for_status()
     return resp.text
