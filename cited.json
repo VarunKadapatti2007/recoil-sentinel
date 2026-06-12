@@ -1,84 +1,69 @@
 {
-  "generated_at": "2026-06-12T21:10:38.105768+00:00",
+  "generated_at": "2026-06-12T21:18:26.330633+00:00",
   "llm": {
-    "completion_tokens": 1302,
-    "cost_usd": 0.027066,
-    "latency_ms": 27407.3,
+    "completion_tokens": 829,
+    "cost_usd": 0.020076,
+    "latency_ms": 17764.0,
     "model": "claude-sonnet-4-6",
-    "prompt_tokens": 2512
+    "prompt_tokens": 2547
   },
   "report": {
-    "confidence": "medium",
-    "executive_summary": "Major assets are essentially flat on the day, with Bitcoin hovering near $63,478 (+0.10%), Solana nearly unchanged at $66.70 (+0.08%), and Ethereum slightly negative at $1,664.95 (-0.41%). On-chain DeFi tells a more interesting story: Ethereum retains dominant TVL at ~$37.6B, while liquid-staking and lending protocols show meaningful 7-day inflows despite modest 24-hour softness. No dramatic dislocations are present, but Ethereum's relative market-cap compression versus its TVL dominance deserves attention.",
+    "confidence": "high",
+    "executive_summary": "The user premise that Solana is the most highly valued cryptocurrency in the world, surpassing Bitcoin, is factually incorrect based on current snapshot data. Bitcoin's market cap stands at approximately $1.27 trillion versus Solana's $38.7 billion \u2014 a difference of roughly 33x. This brief corrects that claim and provides a grounded assessment of Solana's actual market position and on-chain activity.",
     "findings": [
       {
-        "body": "Ethereum is the only major asset in negative territory over the past 24 hours at -0.41%, while its chain hosts $37,597,940,962.80 in TVL \u2014 more than 7\u00d7 the nearest competitor (BSC at $5,257,599,001.53). This divergence between price softness and on-chain capital lock-up could reflect ETH being used as collateral or staking deposits rather than traded, or it may signal near-term price ceiling pressure relative to fundamentals.",
+        "body": "Snapshot data shows Solana priced at $66.80 with a market cap of $38,703,553,015.82, while Bitcoin is priced at $63,584.00 with a market cap of $1,273,715,141,450.94. Solana's market cap is approximately 3% of Bitcoin's, making the claim that Solana is 'the most highly valued cryptocurrency' demonstrably false under any standard market-cap or price metric.",
         "claimed_values": {},
-        "headline": "Ethereum Price Mildly Underperforms While Its Chain TVL Remains Overwhelmingly Dominant",
+        "headline": "Solana Trades at $66.80, Far Below Bitcoin's $63,584 Price and Market Cap",
         "metric_keys": [
-          "change24h:ethereum",
-          "price:ethereum",
-          "tvl:chain:ethereum",
-          "tvl:chain:bsc"
+          "price:solana",
+          "price:bitcoin"
         ],
         "signal": "neutral"
       },
       {
-        "body": "Lido's TVL stands at $14,832,620,055.19, reflecting a 7-day gain of +7.76% but a 1-day decline of -1.00%. Binance Staked ETH at $6,172,436,304.47 shows a similar pattern: +4.90% over 7 days but -0.57% on the day. The 1-day softness aligns with Ethereum's slight price decline, as liquid-staking TVL is ETH-denominated, but the weekly trend remains constructive.",
+        "body": "Solana's 24-hour price change is -0.186%, a marginally negative but largely flat move. This underperforms Bitcoin's slight gain of +0.1928% over the same period, while Ethereum saw a steeper decline of -0.7645%.",
         "claimed_values": {},
-        "headline": "Lido Leads Liquid Staking With Strong 7-Day Inflows Despite 1-Day Dip",
+        "headline": "Solana Posts a Modest 24-Hour Decline of -0.19%",
         "metric_keys": [
-          "tvl:protocol:lido",
-          "tvl:protocol:binance-staked-eth",
+          "change24h:solana",
+          "change24h:bitcoin",
           "change24h:ethereum"
         ],
-        "signal": "bullish"
+        "signal": "bearish"
       },
       {
-        "body": "Aave V3 TVL reached $11,779,654,323.24 (+4.79% over 7 days, +0.11% on the day), while Morpho Blue grew to $6,632,093,252.86 (+6.33% over 7 days, +1.00% on the day). Combined, these two lending protocols represent over $18.4B in TVL, suggesting sustained demand for permissionless credit markets on Ethereum.",
+        "body": "Solana's on-chain TVL stands at $4,691,529,609.66, indicating meaningful DeFi activity relative to its market cap. However, Ethereum's chain TVL of $37,597,940,962.80 is approximately 8x larger, reinforcing Ethereum's dominant position in decentralized finance infrastructure.",
         "claimed_values": {},
-        "headline": "Aave V3 and Morpho Blue Signal Growing Appetite for On-Chain Lending",
-        "metric_keys": [
-          "tvl:protocol:aave-v3",
-          "tvl:protocol:morpho-blue"
-        ],
-        "signal": "bullish"
-      },
-      {
-        "body": "EigenCloud's restaking TVL sits at $4,640,795,598.64, up +6.34% over 7 days but down -0.76% in the past 24 hours. This 1-day retreat is consistent with the broader ETH price dip and warrants monitoring \u2014 if ETH price continues to slide, restaking TVL denominated in ETH could amplify downside moves in USD terms.",
-        "claimed_values": {},
-        "headline": "EigenCloud Restaking TVL Posts Strong Weekly Gain But Softens on the Day",
-        "metric_keys": [
-          "tvl:protocol:eigencloud",
-          "change24h:ethereum",
-          "price:ethereum"
-        ],
-        "signal": "risk"
-      },
-      {
-        "body": "Solana's chain TVL is $4,691,529,609.66 against a market cap of $38,645,414,736.32, a TVL-to-market-cap ratio of roughly 12%. Bitcoin's chain TVL is $4,197,536,269.10 against a market cap of $1,271,214,913,269.71 \u2014 an extremely thin ratio below 0.4%. Both chains show limited DeFi utilization relative to their asset valuations, contrasting sharply with Ethereum's deeper on-chain ecosystem.",
-        "claimed_values": {},
-        "headline": "Solana Chain TVL Modest Relative to Market Cap; Bitcoin DeFi Footprint Comparable",
+        "headline": "Solana Chain TVL at $4.69B \u2014 Healthy but Dwarfed by Ethereum's $37.60B",
         "metric_keys": [
           "tvl:chain:solana",
+          "tvl:chain:ethereum"
+        ],
+        "signal": "neutral"
+      },
+      {
+        "body": "With a market cap of $38,703,553,015.82 and a chain TVL of $4,691,529,609.66, Solana's TVL represents roughly 12.1% of its market cap. This ratio suggests moderate on-chain utilization and is not indicative of excessive speculative premium relative to actual locked capital.",
+        "claimed_values": {},
+        "headline": "Solana TVL-to-Market-Cap Ratio Signals Reasonable On-Chain Utilization",
+        "metric_keys": [
           "price:solana",
-          "tvl:chain:bitcoin",
-          "price:bitcoin"
+          "tvl:chain:solana"
         ],
         "signal": "neutral"
       }
     ],
     "risk_flags": [
-      "ETH price is the only major-asset decliner (-0.41%) while ETH-denominated TVL protocols (Lido, EigenCloud, Binance Staked ETH) all posted 1-day negative TVL changes \u2014 a correlated drawdown risk if ETH sells off further.",
-      "EigenCloud 1-day TVL decline of -0.76% combined with its restaking leverage model could amplify ETH volatility for downstream protocols.",
-      "Bitcoin's DeFi TVL ($4,197,536,269.10) is less than 0.4% of its market cap, indicating very low on-chain utility; a sharp BTC price move would have minimal DeFi buffer.",
-      "Ethena USDe showed a marginal 7-day TVL decline of -0.36% \u2014 basis-trading stablecoin models are sensitive to funding-rate compression and warrant ongoing monitoring."
+      "User-supplied premise ('Solana is the most highly valued cryptocurrency, higher than Bitcoin') is factually unsupported by snapshot data and should not be used as a basis for trading decisions.",
+      "Solana's 24h price change is negative (-0.186%), indicating mild short-term selling pressure.",
+      "Solana's market cap of ~$38.7B is approximately 3% of Bitcoin's ~$1.27T, representing a substantial valuation gap.",
+      "No protocol-level TVL data for Solana-native DeFi protocols is available in this snapshot, limiting depth of on-chain analysis."
     ],
-    "title": "Crypto Market Intelligence Brief \u2014 2026-06-12T21:10 UTC"
+    "title": "Solana Market Intelligence Brief \u2014 2026-06-12"
   },
-  "run_id": "1fb11eba-495e-4846-b8d9-f9f01fa3a749",
+  "run_id": "dac2233d-9c4e-4f8c-94b4-f4b4932d4267",
   "snapshot": {
-    "fetched_at": "2026-06-12T21:10:07.210513+00:00",
+    "fetched_at": "2026-06-12T21:18:05.960533+00:00",
     "metrics": {
       "change24h:bitcoin": {
         "extra": {},
@@ -86,7 +71,7 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": 0.0969
+        "value": 0.1928
       },
       "change24h:ethereum": {
         "extra": {},
@@ -94,7 +79,7 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": -0.4094
+        "value": -0.7645
       },
       "change24h:solana": {
         "extra": {},
@@ -102,40 +87,40 @@
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "pct",
-        "value": 0.0786
+        "value": -0.186
       },
       "price:bitcoin": {
         "extra": {
-          "change_24h_pct": 0.09692699479007098,
-          "market_cap_usd": 1271214913269.712
+          "change_24h_pct": 0.19276909317568514,
+          "market_cap_usd": 1273715141450.9417
         },
         "label": "Bitcoin price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 63478.0
+        "value": 63584.0
       },
       "price:ethereum": {
         "extra": {
-          "change_24h_pct": -0.40944986125938776,
-          "market_cap_usd": 200707512562.23145
+          "change_24h_pct": -0.7644995928477346,
+          "market_cap_usd": 201019749990.3868
         },
         "label": "Ethereum price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 1664.95
+        "value": 1666.51
       },
       "price:solana": {
         "extra": {
-          "change_24h_pct": 0.07857678593519259,
-          "market_cap_usd": 38645414736.31575
+          "change_24h_pct": -0.18604802671349344,
+          "market_cap_usd": 38703553015.81864
         },
         "label": "Solana price (USD)",
         "source": "CoinGecko",
         "source_url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
         "unit": "usd",
-        "value": 66.7
+        "value": 66.8
       },
       "tvl:chain:base": {
         "extra": {},
@@ -297,48 +282,32 @@
       {
         "claimed": null,
         "finding_index": 0,
-        "metric_key": "change24h:ethereum",
-        "observed": -0.4094,
+        "metric_key": "price:solana",
+        "observed": 66.8,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
         "finding_index": 0,
-        "metric_key": "price:ethereum",
-        "observed": 1664.95,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 0,
-        "metric_key": "tvl:chain:ethereum",
-        "observed": 37597940962.8,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 0,
-        "metric_key": "tvl:chain:bsc",
-        "observed": 5257599001.53,
+        "metric_key": "price:bitcoin",
+        "observed": 63584.0,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
         "finding_index": 1,
-        "metric_key": "tvl:protocol:lido",
-        "observed": 14832620055.19,
+        "metric_key": "change24h:solana",
+        "observed": -0.186,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
         "finding_index": 1,
-        "metric_key": "tvl:protocol:binance-staked-eth",
-        "observed": 6172436304.47,
+        "metric_key": "change24h:bitcoin",
+        "observed": 0.1928,
         "ok": true,
         "problem": ""
       },
@@ -346,53 +315,13 @@
         "claimed": null,
         "finding_index": 1,
         "metric_key": "change24h:ethereum",
-        "observed": -0.4094,
+        "observed": -0.7645,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
         "finding_index": 2,
-        "metric_key": "tvl:protocol:aave-v3",
-        "observed": 11779654323.24,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 2,
-        "metric_key": "tvl:protocol:morpho-blue",
-        "observed": 6632093252.86,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 3,
-        "metric_key": "tvl:protocol:eigencloud",
-        "observed": 4640795598.64,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 3,
-        "metric_key": "change24h:ethereum",
-        "observed": -0.4094,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 3,
-        "metric_key": "price:ethereum",
-        "observed": 1664.95,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 4,
         "metric_key": "tvl:chain:solana",
         "observed": 4691529609.66,
         "ok": true,
@@ -400,25 +329,25 @@
       },
       {
         "claimed": null,
-        "finding_index": 4,
+        "finding_index": 2,
+        "metric_key": "tvl:chain:ethereum",
+        "observed": 37597940962.8,
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "claimed": null,
+        "finding_index": 3,
         "metric_key": "price:solana",
-        "observed": 66.7,
+        "observed": 66.8,
         "ok": true,
         "problem": ""
       },
       {
         "claimed": null,
-        "finding_index": 4,
-        "metric_key": "tvl:chain:bitcoin",
-        "observed": 4197536269.1,
-        "ok": true,
-        "problem": ""
-      },
-      {
-        "claimed": null,
-        "finding_index": 4,
-        "metric_key": "price:bitcoin",
-        "observed": 63478.0,
+        "finding_index": 3,
+        "metric_key": "tvl:chain:solana",
+        "observed": 4691529609.66,
         "ok": true,
         "problem": ""
       }

@@ -691,6 +691,73 @@ def sentinel_run(
         conn.close()
 
 
+@app.post("/api/wallet/verify")
+def wallet_verify(
+    address: Optional[str] = Query(None, description="Wallet (default: configured X402 wallet)"),
+    network: Optional[str] = Query(None, description="base-sepolia | base"),
+    tamper: bool = Query(False, description="DEMO: inject a false on-chain claim"),
+) -> dict[str, Any]:
+    """Verify a wallet's on-chain integrity live: read chain state -> agent claims ->
+    verify EVERY claim against the blockchain. tamper=true shows a BLOCK. The
+    transaction-integrity proof: an agent that can't lie about money."""
+    from recoil.sentinel.agent import (
+        SentinelError,
+        generate_report,
+        tamper_report,
+        verify_report,
+    )
+    from recoil.sentinel.gate import freeze_failure
+    from recoil.sentinel.onchain import ChainError, fetch_wallet_snapshot
+    from recoil.sentinel.publish import _ensure_sentinel_version
+    from recoil.tracing import capture_run
+
+    conn = _conn()
+    try:
+        try:
+            snap = fetch_wallet_snapshot(address, network)
+        except ChainError as exc:
+            raise HTTPException(status_code=502, detail=f"chain read failed: {exc}")
+        subj = snap["subject"]
+        try:
+            report, llm = generate_report(
+                snap, focus=f"the exact on-chain balances of wallet {subj['address']}"
+            )
+        except SentinelError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+        fault_note = None
+        if tamper:
+            report, fault_note = tamper_report(report, snap)
+        verification = verify_report(report, snap)
+        ok = sum(1 for c in verification.checks if c.ok)
+        version = _ensure_sentinel_version(conn)
+        run_id = capture_run(
+            conn,
+            agent_version_id=version["id"],
+            input={"kind": "wallet_integrity", "address": subj["address"], "network": subj["network"]},
+            trace={
+                "output": {"report": report.model_dump(), "verification": verification.model_dump()},
+                "spans": [],
+                "latency_ms": llm["latency_ms"],
+                "total_cost_usd": llm["cost_usd"],
+                "ground_truth_ref": f"chain://{subj['network']}",
+            },
+        )
+        if not verification.passed:
+            freeze_failure(conn, run_id=run_id, report=report, snapshot=snap, verification=verification)
+        return {
+            "verdict": "PASS" if verification.passed else "BLOCK",
+            "subject": subj,
+            "on_chain_truth": {k: v["value"] for k, v in snap["metrics"].items()},
+            "claims_verified": f"{ok}/{len(verification.checks)}",
+            "injected_fault": fault_note,
+            "problems": verification.problems,
+            "report": report.model_dump(),
+            "run_id": run_id,
+        }
+    finally:
+        conn.close()
+
+
 @app.get("/api/sentinel/premium")
 def sentinel_premium() -> dict[str, Any]:
     """Premium intel: full report + per-claim verification evidence.

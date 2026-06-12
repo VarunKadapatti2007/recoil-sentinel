@@ -504,6 +504,103 @@ def _sentinel_once(
         return 2
 
 
+@app.command(name="verify-wallet")
+def verify_wallet(
+    address: Optional[str] = typer.Option(
+        None, "--address", help="Wallet to verify (default: X402_WALLET_ADDRESS from .env)"
+    ),
+    network: Optional[str] = typer.Option(None, "--network", help="base-sepolia | base"),
+    out: str = typer.Option("wallet_integrity.md", "--out", help="Report output path"),
+    tamper: bool = typer.Option(
+        False, "--tamper", help="DEMO: inject a false on-chain claim to show the gate catch it"
+    ),
+) -> None:
+    """Verify a wallet's on-chain integrity: fetch live chain state -> agent makes
+    structured claims -> verify EVERY claim against the blockchain -> publish on
+    PASS. Exits 1 (BLOCK) if any claim does not match the chain. Same engine as
+    `recoil sentinel`, with the blockchain as ground truth."""
+    import time as _time
+    from pathlib import Path as _Path
+
+    from .sentinel.agent import SentinelError, generate_report, tamper_report, verify_report
+    from .sentinel.gate import freeze_failure
+    from .sentinel.onchain import ChainError, fetch_wallet_snapshot
+    from .sentinel.publish import _ensure_sentinel_version, render_cited_md
+    from .tracing import capture_run
+
+    conn = _conn()
+    print("recoil verify-wallet — on-chain transaction integrity (live chain, no mock)")
+    print("-" * 64)
+    try:
+        t0 = _time.perf_counter()
+        snap = fetch_wallet_snapshot(address, network)
+        subj = snap["subject"]
+        m = snap["metrics"]
+        print(
+            f" [1/4] on-chain truth: {subj['address']} on {subj['network']} (chain {subj['chain_id']}) "
+            f"— {m['wallet:eth_balance']['value']} ETH, {m['wallet:usdc_balance']['value']} USDC, "
+            f"nonce {m['wallet:tx_count']['value']}"
+        )
+        fetch_ms = (_time.perf_counter() - t0) * 1000
+
+        report, llm = generate_report(
+            snap,
+            focus=f"the on-chain integrity and exact balances of wallet {subj['address']} "
+            f"on {subj['network']}; report each balance precisely",
+        )
+        print(f" [2/4] report by {llm['model']}: {len(report.findings)} findings, ${llm['cost_usd']}")
+
+        if tamper:
+            report, fault = tamper_report(report, snap)
+            typer.secho(f"  !!   FAULT INJECTED (demo): {fault}", fg=typer.colors.YELLOW, bold=True)
+
+        verification = verify_report(report, snap)
+        ok = sum(1 for c in verification.checks if c.ok)
+        print(f" [3/4] verification vs chain: {ok}/{len(verification.checks)} claims grounded")
+        for p in verification.problems:
+            typer.secho(f"        x {p}", fg=typer.colors.RED)
+
+        version = _ensure_sentinel_version(conn)
+        run_id = capture_run(
+            conn,
+            agent_version_id=version["id"],
+            input={"kind": "wallet_integrity", "address": subj["address"], "network": subj["network"]},
+            trace={
+                "output": {"report": report.model_dump(), "verification": verification.model_dump()},
+                "spans": [],
+                "latency_ms": round(fetch_ms + llm["latency_ms"], 1),
+                "total_cost_usd": llm["cost_usd"],
+                "ground_truth_ref": f"chain://{subj['network']}",
+            },
+        )
+
+        if verification.passed:
+            path = _Path(out)
+            path.write_text(
+                render_cited_md(report, snap, verification, run_id=run_id), encoding="utf-8"
+            )
+            typer.secho(
+                f" [4/4] {PASS_MARK} verified & published: {path} — every claim matches the chain.",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+            raise typer.Exit(code=0)
+
+        case_id = freeze_failure(
+            conn, run_id=run_id, report=report, snapshot=snap, verification=verification
+        )
+        typer.secho(
+            f" [4/4] {BLOCK_MARK} BLOCKED — {len(verification.problems)} claim(s) do not match the "
+            f"chain. Nothing published/executed. Frozen as regression case {case_id[:8]}.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+    except (ChainError, SentinelError) as exc:
+        typer.secho(f"verify-wallet error: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+
 @app.command()
 def serve(
     port: int = typer.Option(config.API_PORT, "--port", help="API port (pinned default 8787)"),
