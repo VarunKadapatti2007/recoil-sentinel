@@ -29,6 +29,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------------------------------------------------------------------------
+# x402 paywall (Phase E): the premium report endpoint is monetized via the
+# Coinbase HTTP-402 standard. Activates only when a wallet is configured AND
+# the x402 SDK is installed; otherwise the endpoint stays open with a notice.
+# Testnet (base-sepolia) uses the public facilitator at x402.org.
+# ---------------------------------------------------------------------------
+X402_ACTIVE = False
+if config.X402_WALLET_ADDRESS:
+    try:
+        from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption
+        from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+        from x402.http.types import RouteConfig
+        from x402.mechanisms.evm.exact import ExactEvmServerScheme
+        from x402.server import x402ResourceServer
+
+        _NETWORKS = {"base-sepolia": "eip155:84532", "base": "eip155:8453"}
+        _x402_network = _NETWORKS.get(config.X402_NETWORK, config.X402_NETWORK)
+        _facilitator = HTTPFacilitatorClient(FacilitatorConfig(url=config.X402_FACILITATOR_URL))
+        _x402_server = x402ResourceServer(_facilitator)
+        _x402_server.register(_x402_network, ExactEvmServerScheme())
+        app.add_middleware(
+            PaymentMiddlewareASGI,
+            routes={
+                "GET /api/sentinel/premium": RouteConfig(
+                    accepts=[
+                        PaymentOption(
+                            scheme="exact",
+                            pay_to=config.X402_WALLET_ADDRESS,
+                            price=config.X402_PRICE,
+                            network=_x402_network,
+                        )
+                    ],
+                    mime_type="application/json",
+                    description="Recoil Sentinel premium intel report (machine-verified claims)",
+                )
+            },
+            server=_x402_server,
+        )
+        X402_ACTIVE = True
+    except Exception as _exc:  # paywall must never take the API down
+        import logging as _logging
+
+        _logging.getLogger("recoil.server").warning("x402 paywall disabled: %s", _exc)
+
 
 def _conn() -> sqlite3.Connection:
     conn = db.connect()
@@ -494,9 +538,32 @@ def sentinel_latest() -> dict[str, Any]:
     return json.loads(sidecar.read_text(encoding="utf-8"))
 
 
+@app.get("/api/sentinel/premium")
+def sentinel_premium() -> dict[str, Any]:
+    """Premium intel: full report + per-claim verification evidence.
+    Behind the x402 paywall when configured — an agent (or human) must pay
+    {X402_PRICE} in USDC on {X402_NETWORK} to unlock."""
+    from recoil.sentinel.publish import CITED_MD_PATH
+
+    sidecar = CITED_MD_PATH.with_suffix(".json")
+    if not sidecar.exists():
+        raise HTTPException(status_code=404, detail="no report published yet")
+    payload = json.loads(sidecar.read_text(encoding="utf-8"))
+    return {
+        "tier": "premium",
+        "paywalled": X402_ACTIVE,
+        "report": payload["report"],
+        "verification_evidence": payload["verification"],
+        "ground_truth_snapshot": payload["snapshot"],
+        "llm": payload["llm"],
+        "run_id": payload["run_id"],
+    }
+
+
 @app.get("/api/sentinel/status")
 def sentinel_status() -> dict[str, Any]:
     from recoil.sentinel.gate import list_sentinel_cases
+    from recoil.sentinel.integrations import clickhouse_stats
     from recoil.sentinel.publish import CITED_MD_PATH, SENTINEL_VERSION_LABEL
 
     conn = _conn()
@@ -514,6 +581,8 @@ def sentinel_status() -> dict[str, Any]:
             "published": CITED_MD_PATH.exists(),
             "frozen_failure_cases": len(list_sentinel_cases(conn)),
             "recent_runs": runs,
+            "paywall_active": X402_ACTIVE,
+            "clickhouse": clickhouse_stats(),
         }
     finally:
         conn.close()

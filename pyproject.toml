@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.40"]
 bedrock = ["anthropic[bedrock]>=0.40"]
+sentinel = ["anthropic>=0.40", "x402[fastapi,evm]", "composio"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]

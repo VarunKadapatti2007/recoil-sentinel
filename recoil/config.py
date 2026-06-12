@@ -65,6 +65,30 @@ AGENT_MODEL = os.environ.get("RECOIL_AGENT_MODEL", "claude-sonnet-4-6")
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
 
+# --- Sentinel sponsor integrations (all optional; graceful no-ops if unset) -
+# x402 paywall (Coinbase HTTP-402): premium report endpoint
+X402_WALLET_ADDRESS = os.environ.get("X402_WALLET_ADDRESS", "")
+X402_NETWORK = os.environ.get("X402_NETWORK", "base-sepolia")
+X402_PRICE = os.environ.get("X402_PRICE", "$0.01")
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/facilitator")
+
+# Composio: real web actions (GitHub issue on publish)
+COMPOSIO_API_KEY = os.environ.get("COMPOSIO_API_KEY", "")
+COMPOSIO_USER_ID = os.environ.get("COMPOSIO_USER_ID", "default")
+COMPOSIO_CONNECTED_ACCOUNT_ID = os.environ.get("COMPOSIO_CONNECTED_ACCOUNT_ID", "")
+COMPOSIO_GITHUB_OWNER = os.environ.get("COMPOSIO_GITHUB_OWNER", "VarunKadapatti2007")
+COMPOSIO_GITHUB_REPO = os.environ.get("COMPOSIO_GITHUB_REPO", "recoil-sentinel")
+
+# ClickHouse Cloud: run/event analytics store
+CLICKHOUSE_HOST = os.environ.get("CLICKHOUSE_HOST", "")
+CLICKHOUSE_USER = os.environ.get("CLICKHOUSE_USER", "default")
+CLICKHOUSE_PASSWORD = os.environ.get("CLICKHOUSE_PASSWORD", "")
+
+# Airbyte: ground-truth ingestion control plane
+AIRBYTE_CLIENT_ID = os.environ.get("AIRBYTE_CLIENT_ID", "")
+AIRBYTE_CLIENT_SECRET = os.environ.get("AIRBYTE_CLIENT_SECRET", "")
+AIRBYTE_WORKSPACE_ID = os.environ.get("AIRBYTE_WORKSPACE_ID", "")
+
 # --- Ports (pinned — never auto-random, see brief §13a) --------------------
 API_PORT = int(os.environ.get("RECOIL_API_PORT", "8787"))
 WEB_PORT = int(os.environ.get("RECOIL_WEB_PORT", "3000"))

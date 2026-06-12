@@ -18,7 +18,7 @@ services:
     name: recoil-api
     runtime: python
     plan: starter
-    buildCommand: pip install -e ".[anthropic]"
+    buildCommand: pip install -e ".[sentinel]"
     startCommand: python -m uvicorn server.main:app --host 0.0.0.0 --port $PORT
     disk:
       name: recoil-data
@@ -35,13 +35,33 @@ services:
         value: "false"
       - key: RECOIL_CITED_PATH
         value: /data/cited.md
+      - key: X402_WALLET_ADDRESS
+        sync: false
+      - key: X402_NETWORK
+        value: base-sepolia
+      - key: COMPOSIO_API_KEY
+        sync: false
+      - key: COMPOSIO_USER_ID
+        sync: false
+      - key: COMPOSIO_CONNECTED_ACCOUNT_ID
+        sync: false
+      - key: CLICKHOUSE_HOST
+        sync: false
+      - key: CLICKHOUSE_PASSWORD
+        sync: false
+      - key: AIRBYTE_CLIENT_ID
+        sync: false
+      - key: AIRBYTE_CLIENT_SECRET
+        sync: false
+      - key: AIRBYTE_WORKSPACE_ID
+        sync: false
 
   - type: cron
     name: recoil-sentinel-cron
     runtime: python
     plan: starter
     schedule: "0 */6 * * *" # every 6 hours — autonomous, no manual trigger
-    buildCommand: pip install -e ".[anthropic]"
+    buildCommand: pip install -e ".[sentinel]"
     startCommand: python -m recoil.cli sentinel
     disk:
       name: recoil-data
@@ -58,3 +78,23 @@ services:
         value: "false"
       - key: RECOIL_CITED_PATH
         value: /data/cited.md
+      - key: X402_WALLET_ADDRESS
+        sync: false
+      - key: X402_NETWORK
+        value: base-sepolia
+      - key: COMPOSIO_API_KEY
+        sync: false
+      - key: COMPOSIO_USER_ID
+        sync: false
+      - key: COMPOSIO_CONNECTED_ACCOUNT_ID
+        sync: false
+      - key: CLICKHOUSE_HOST
+        sync: false
+      - key: CLICKHOUSE_PASSWORD
+        sync: false
+      - key: AIRBYTE_CLIENT_ID
+        sync: false
+      - key: AIRBYTE_CLIENT_SECRET
+        sync: false
+      - key: AIRBYTE_WORKSPACE_ID
+        sync: false

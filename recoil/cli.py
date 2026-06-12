@@ -432,6 +432,37 @@ def _sentinel_once(*, out: Optional[str], skip_gate: bool) -> int:
                 fg=typer.colors.GREEN,
                 bold=True,
             )
+            from .sentinel.integrations import (
+                airbyte_ground_truth_check,
+                clickhouse_record_run,
+                composio_publish_action,
+            )
+
+            ok_claims = sum(1 for c in verification.checks if c.ok)
+            print(" [5/5] sponsor integrations:")
+            print(
+                "        clickhouse: "
+                + clickhouse_record_run(
+                    run_id=result["run_id"],
+                    verdict="PASS",
+                    claims_total=len(verification.checks),
+                    claims_ok=ok_claims,
+                    findings=len(report.findings),
+                    llm_stats=llm_stats,
+                    title=report.title,
+                )
+            )
+            print(
+                "        composio:   "
+                + composio_publish_action(
+                    title=report.title,
+                    summary=report.executive_summary,
+                    run_id=result["run_id"],
+                    claims_ok=ok_claims,
+                    claims_total=len(verification.checks),
+                )
+            )
+            print("        airbyte:    " + airbyte_ground_truth_check())
             return 0
         case_id = freeze_failure(
             conn,

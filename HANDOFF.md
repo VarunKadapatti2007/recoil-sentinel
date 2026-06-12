@@ -95,7 +95,27 @@ cd web; npm run dev                          # dashboard on :3000
    (demo-check resets first) but consider filtering by kind if it causes noise.
 5. Windows PowerShell 5.1: no `&&`; loader scripts already handle this — see scripts/.
 
-## What remains (in priority order, from RECOIL_SENTINEL_PLAN.md)
+## UPDATE (later 2026-06-12): Phases B/C/D/E are DONE and live-verified
+
+`recoil/sentinel/integrations.py` + x402 middleware in `server/main.py`. All four
+sponsor integrations run REAL and were individually live-tested (see MEMORY.md entry
+"Phases B+C+D+E SHIPPED" for the exact verified behavior and SDK gotchas: x402 needs
+the [evm] extra; Composio args are positional + needs version-skip flag + user_id must
+match the connection's entity; ClickHouse Cloud idles and times out on first wake).
+The full pipeline fired live: report published, ClickHouse row inserted, GitHub issue
+#2 opened autonomously, Airbyte authenticated, premium endpoint returns HTTP 402.
+
+**Genuinely remaining:**
+- Phase G: deploy via render.yaml (user clicks New → Blueprint, sets the sync:false
+  env vars from .env in the Render dashboard), then verify
+  https://<service>.onrender.com/cited.md and the 6-hourly cron.
+- Optional: an Airbyte connection in the user's workspace (UI task) so
+  airbyte_ground_truth_check reports connections + can trigger syncs.
+- Optional: paying-client demo for x402 (x402 Python client + testnet USDC from a
+  Base Sepolia faucet) to show the full 402 → pay → unlock loop on stage.
+- Submission: 3-min demo recording + Devpost.
+
+## Original phase plan (historical — B-E now complete)
 
 Each needs credentials from the user — ASK for them before building; verify every
 external API against current docs before coding (project rule):

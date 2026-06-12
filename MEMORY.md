@@ -65,6 +65,59 @@
 
 ## Changelog
 
+### 2026-06-12 — Phases B+C+D+E SHIPPED: all sponsor integrations LIVE-VERIFIED
+
+**What:** `recoil/sentinel/integrations.py` + x402 middleware in `server/main.py`.
+All four integrations are REAL (no mocks) and individually live-tested:
+- **x402 (Phase E):** `pip install x402[fastapi,evm]` (evm extra REQUIRED or middleware
+  refuses to register). `PaymentMiddlewareASGI` + `x402ResourceServer` + public testnet
+  facilitator (https://x402.org/facilitator) guard `GET /api/sentinel/premium`
+  ($0.01 USDC, base-sepolia = eip155:84532). VERIFIED: unpaid request → HTTP 402 with
+  base64 payment requirements in the `payment-required` header (x402 protocol v2).
+  Paywall activates only when X402_WALLET_ADDRESS set; failures never take the API down.
+- **Composio (Phase D):** SDK `composio.tools.execute("GITHUB_CREATE_AN_ISSUE", args,
+  user_id=…, connected_account_id=…, dangerously_skip_version_check=True)` — arguments
+  POSITIONAL; version pin or skip-flag REQUIRED. The user's GitHub connection lives
+  under entity `pg-test-d57ce657-…` with account `ca_3yNgnnjrLbgA` (both now in .env;
+  user_id MUST match the connection's owner or error 1812). VERIFIED: real issues
+  created autonomously — repo issues #1 (smoke) and #2 (live pipeline).
+- **ClickHouse (Phase C):** HTTPS interface via httpx (no driver), `sentinel_runs`
+  MergeTree table auto-created, JSONEachRow inserts, aggregate stats in
+  /api/sentinel/status. GOTCHA: ClickHouse Cloud idles — first request after sleep can
+  ReadTimeout; integration degrades gracefully and succeeds on retry. VERIFIED: live
+  insert + count + stats roundtrip.
+- **Airbyte (Phase B):** client-credentials token (POST /v1/applications/token), lists
+  workspace connections, can trigger sync of the first connection. VERIFIED: live auth,
+  workspace reachable (no connections configured yet — user can add one in Airbyte UI
+  and it gets picked up automatically).
+
+**Pipeline:** `recoil sentinel` step [5/5] now fires ClickHouse + Composio + Airbyte on
+every successful publish (all graceful). New endpoint `GET /api/sentinel/premium`
+(full report + verification evidence + snapshot) behind the paywall.
+
+**Full live e2e VERIFIED:** 20 live metrics → claude-sonnet-4-6 report ($0.025) →
+16/16 claims grounded → cited.md published → ClickHouse row 2 → GitHub issue #2
+opened autonomously → Airbyte authenticated. pytest 22/22.
+
+**Also:** pyproject `[sentinel]` extra (anthropic + x402[fastapi,evm] + composio);
+render.yaml: buildCommand uses `.[sentinel]`, all sponsor env vars added (sync:false).
+
+### 2026-06-12 — Repo public + full live verification with DEMO_MODE=false
+
+- Pushed to public GitHub: https://github.com/VarunKadapatti2007/recoil-sentinel
+  (initial commit verified secret-free; .env never staged). cited.md now has a public URL.
+- ANTHROPIC key ROTATED by user (old exposed key dead). .env now holds all Phase B-E
+  creds: CDP/x402 (base-sepolia), Composio, ClickHouse Cloud, Airbyte client_id+secret.
+- RECOIL_DEMO_MODE=false verified end-to-end: `recoil gate --candidate v_regressed`
+  judged LIVE by claude-opus-4-8 → same verdict as the deterministic judge (BLOCK,
+  same 2 regressed cases, exit 1) — strong judge-agreement validation. pytest 22/22
+  (tests pin mock judge, unaffected). doctor READY. Third live sentinel run: 19/19
+  grounded, published, exit 0.
+- NOTE: with demo mode off, every dashboard "Run gate" click = 12 live Opus judgments
+  (~1-2 min, ~$0.2). For a stage demo of the triage flow, flip RECOIL_DEMO_MODE=true;
+  Sentinel ignores this flag entirely (always live).
+- User preference (standing): NO AI attribution in commits/PRs/docs.
+
 ### 2026-06-12 — Sentinel Phase F SHIPPED: regression gate over real reports + autonomy + Render blueprint
 
 **What:**
