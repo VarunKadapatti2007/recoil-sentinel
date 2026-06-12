@@ -65,6 +65,21 @@
 
 ## Changelog
 
+### 2026-06-12 — LIVE on public cited.md (requirement fully satisfied)
+
+Cracked the full publish path. Enabled content generation (`senso generate update-settings
+--data '{"enable_content_generation":true}'`). Found the shared "Cited.md" destination
+(publisher_id afa1052b-8226-438c-895e-335dcf21743a, url cited.md). Direct publish works via
+POST /org/content-engine/publish with {geo_question_id, raw_markdown, seo_title, summary,
+publisher_ids}. Created a GEO prompt (POST /org/prompts {question_text, type:awareness}) →
+geo_question_id 9f0c0198-fc6e-47b4-b67f-a37634aa0f33 (now in .env as SENSO_GEO_QUESTION_ID).
+FIRST LIVE ARTICLE: https://cited.md/article/a4fb9f3c-90b0-4463-9e64-f677f35907fc (HTTP 200,
+shows "Recoil Sentinel"). Wired senso_publish_citeable to prefer engine-publish (live cited.md
+article) and fall back to /org/kb/raw ingest. VERIFIED: `recoil sentinel` prints
+"published LIVE to cited.md: https://cited.md/article/…". config: SENSO_PUBLISHER_ID (default
+cited.md) + SENSO_GEO_QUESTION_ID. The "publish to cited.md" eligibility requirement is now
+genuinely met, plus strong "Best Use of Senso.ai".
+
 ### 2026-06-12 — REAL cited.md publishing via Senso (eligibility requirement)
 
 DISCOVERY: "cited.md" in the hackathon is a REAL platform (cited.md, powered by Senso.ai —
