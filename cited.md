@@ -1,59 +1,61 @@
-# Crypto Market Intelligence Brief — 2026-06-12T22:05Z
+# Crypto Market Intelligence Brief — 2026-06-12T22:17Z
 
-> **Recoil Sentinel** · autonomous intelligence brief · generated 2026-06-12 22:06 UTC · run `3b864a75` · confidence: **medium**
-> Ground truth: live snapshot at 2026-06-12T22:05:43.656015+00:00 · **18/18 claims verified** against source data before publication.
+> **Recoil Sentinel** · autonomous intelligence brief · generated 2026-06-12 22:18 UTC · run `89ef0023` · confidence: **medium**
+> Ground truth: live snapshot at 2026-06-12T22:17:29.400458+00:00 · **19/19 claims verified** against source data before publication.
 
 ## Executive summary
 
-All three major assets (BTC, ETH, SOL) are posting modest 24-hour losses, with Ethereum underperforming at nearly -0.9%. On-chain, Ethereum remains the dominant DeFi settlement layer by a wide margin. Lending and restaking protocols show healthy 7-day TVL momentum, while liquid staking incumbents dipped slightly on the day. Overall market conditions are unremarkable but warrant watching given ETH's relative weakness against BTC.
+Major crypto assets are marginally lower across the board over the past 24 hours, with Bitcoin nearly flat and Ethereum and Solana posting modest declines. DeFi protocol TVLs tell a more constructive story: lending and staking protocols show meaningful 7-day gains, and Ethereum retains dominant chain TVL at over $37.6B. No dramatic dislocations are present; the environment is one of mild risk-off price action against a backdrop of steady-to-growing on-chain capital deployment.
 
 ## Findings
 
-### ▼ Ethereum Underperforms Bitcoin on 24-Hour Basis
+### ▼ Bitcoin Flat; Ethereum and Solana Softer on 24-Hour Basis
 
-ETH declined -0.8961% over 24 hours to $1,663.38, while BTC shed only -0.0759% to $63,480.00 — a spread of approximately 82 basis points. This relative underperformance is notable given Ethereum's dominant DeFi TVL position ($37.6B chain TVL vs. BTC's $4.2B), suggesting price weakness is not driven by on-chain outflows but may reflect broader market rotation or sentiment. [^1][^2][^3][^4][^5][^6]
+Bitcoin is essentially unchanged at -0.16% over 24 hours, trading at $63,481, while Ethereum fell -0.98% to $1,663.14 and Solana dropped -0.60% to $66.56. The divergence, though small, suggests Ethereum is underperforming relative to Bitcoin on a short-term basis. Market cap spreads remain wide: Bitcoin at ~$1.27T dwarfs Ethereum at ~$200.7B and Solana at ~$38.6B. [^1][^2][^3][^4][^5][^6]
 
-### ▲ Morpho Blue and Aave V3 Lead 7-Day Lending TVL Growth
+### ▲ Ethereum Chain TVL Dominates at $37.6B, Nearly 7x Nearest Competitor
 
-Morpho Blue recorded a +6.33% 7-day TVL gain to $6.63B and a +1.00% 1-day gain, while Aave V3 grew +4.79% over 7 days to $11.78B. Both lending protocols are accumulating capital in a softening price environment, signaling that yield-seeking capital flows into structured lending remain robust despite asset price headwinds. [^7][^8]
+Ethereum chain TVL stands at $37,626,321,481.64, far ahead of BSC ($5,252,714,981.74), Solana ($4,685,223,682.14), Tron ($4,365,170,581.94), Bitcoin ($4,196,992,910.81), and Base ($4,014,392,145.02). This concentration underscores Ethereum's continued primacy as the settlement layer for DeFi capital, though the clustering of competing chains between $4B–$5.3B suggests growing multi-chain fragmentation below the top tier. [^7][^8][^9][^10][^11][^12]
 
-### • Liquid Staking TVLs Slip on the Day Despite Strong Weekly Gains
+### ▲ Lending Protocols Show Strong 7-Day TVL Momentum
 
-Lido's TVL fell -0.7814% in 24 hours to $14.87B, and Binance Staked ETH dropped -0.7765% to $6.17B — both declines tracking closely with ETH's own price weakness. However, 7-day figures remain constructive: Lido +4.15% and Binance Staked ETH +7.44%, indicating the 1-day dip is price-driven rather than a structural withdrawal trend. [^9][^10]
+Morpho Blue posted a +6.33% 7-day TVL gain to $6,632,093,252.86, while Aave V3 rose +4.79% to $11,779,654,323.24 over the same period. Both protocols also registered positive 1-day changes (+1.00% and +0.11% respectively), indicating sustained inflow rather than a single-day spike. This is a constructive signal for DeFi credit markets. [^13][^14]
 
-### ▲ SSV Network Posts Strongest 7-Day Staking Pool Growth Among Tracked Protocols
+### • Liquid Staking TVL Rising Weekly Despite Daily Dip
 
-SSV Network's TVL rose +7.38% over 7 days to $12.27B, making it the top 7-day performer among all tracked protocols in this snapshot. Its 1-day decline of -0.7780% mirrors the broader liquid staking sector and is consistent with ETH price movement, not protocol-specific outflows. [^11]
+Lido TVL sits at $14,866,016,587.71 (+4.15% 7d, -0.78% 1d) and Binance Staked ETH at $6,169,472,177.97 (+7.44% 7d, -0.78% 1d); SSV Network shows a similar pattern at $12,273,361,689.94 (+7.38% 7d, -0.78% 1d). The uniform ~0.78% single-day decline across staking protocols closely mirrors Ethereum's spot price drop of -0.98%, suggesting the TVL moves are largely price-driven rather than reflecting meaningful unstaking activity. [^15][^16][^17][^2]
 
-### • Ethereum Chain TVL Dominance Remains Extreme Relative to Competitors
+### ⚠ Ethena USDe TVL Flat to Slightly Negative on 7-Day View Despite Daily Uptick
 
-Ethereum's chain TVL stands at $37.63B — more than 7x BSC ($5.25B), 8x Solana ($4.69B), and roughly 9x Base ($4.01B) and Tron ($4.37B). Solana's TVL-to-market-cap ratio ($4.69B TVL vs. $38.57B market cap, ~12.2%) is markedly higher than Ethereum's ($37.63B TVL vs. $200.79B market cap, ~18.7%), indicating Ethereum still leads in capital efficiency on-chain but Solana is not far behind proportionally. [^5][^12][^13][^14][^15][^4][^16]
+Ethena USDe TVL is $4,484,774,993.33, with a mild 1-day gain of +0.20% but a 7-day decline of -0.36%. As a basis-trading synthetic dollar protocol, this flat trend amid broader DeFi growth could indicate reduced demand for its yield product or tightening funding rate arbitrage conditions. Traders should monitor this as a leading indicator for risk appetite in synthetic stable markets. [^18]
 
 ## Risk flags
 
-- ETH's -0.8961% 24h decline significantly outpaces BTC's -0.0759%, raising short-term relative weakness risk for ETH-denominated DeFi TVL valuations.
-- Liquid staking protocols (Lido, Binance Staked ETH, SSV Network) all posted ~-0.78% 1-day TVL declines in lockstep with ETH price — a sustained ETH drawdown would amplify TVL erosion.
-- Ethena USDe shows a -0.3634% 7-day TVL trend, the only tracked protocol with a negative 7-day change, warranting monitoring for basis trading strategy stress.
-- Solana price at $66.51 with a market cap of $38.57B and chain TVL of only $4.69B leaves it exposed if speculative interest wanes without proportional DeFi growth.
+- Ethereum price decline of -0.9758% over 24h is the largest among the three tracked assets, potentially signaling rotation or relative weakness.
+- Uniform ~0.78% single-day TVL decline across Lido, Binance Staked ETH, and SSV Network is price-correlated but warrants monitoring if ETH continues lower.
+- Ethena USDe 7-day TVL contraction of -0.363% against a backdrop of broad DeFi TVL growth may indicate protocol-specific headwinds in basis trading yields.
+- Solana chain TVL ($4,685,223,682.14) is only ~12.5% of Ethereum chain TVL, limiting its weight as an alternative settlement layer despite competitive asset-level market cap.
 
 ## Citations
 
-[^1]: **Bitcoin 24h change (%)** = -0.08 (pct) — CoinGecko, fetched 2026-06-12T22:05:43.656015+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
-[^2]: **Ethereum 24h change (%)** = -0.90 (pct) — CoinGecko, fetched 2026-06-12T22:05:43.656015+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
-[^3]: **Bitcoin price (USD)** = 63,480.00 (usd) — CoinGecko, fetched 2026-06-12T22:05:43.656015+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
-[^4]: **Ethereum price (USD)** = 1,663.38 (usd) — CoinGecko, fetched 2026-06-12T22:05:43.656015+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
-[^5]: **Ethereum chain TVL (USD)** = 37,626,321,481.64 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/Ethereum>
-[^6]: **Bitcoin chain TVL (USD)** = 4,196,992,910.81 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/Bitcoin>
-[^7]: **Morpho Blue TVL (USD)** = 6,632,093,252.86 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/protocol/morpho-blue>
-[^8]: **Aave V3 TVL (USD)** = 11,779,654,323.24 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/protocol/aave-v3>
-[^9]: **Lido TVL (USD)** = 14,866,016,587.71 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/protocol/lido>
-[^10]: **Binance staked ETH TVL (USD)** = 6,169,472,177.97 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/protocol/binance-staked-eth>
-[^11]: **SSV Network TVL (USD)** = 12,273,361,689.94 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/protocol/ssv-network>
-[^12]: **BSC chain TVL (USD)** = 5,252,714,981.74 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/BSC>
-[^13]: **Solana chain TVL (USD)** = 4,685,223,682.14 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/Solana>
-[^14]: **Base chain TVL (USD)** = 4,014,392,145.02 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/Base>
-[^15]: **Tron chain TVL (USD)** = 4,365,170,581.94 (usd) — DefiLlama, fetched 2026-06-12T22:05:43.656015+00:00 — <https://defillama.com/chain/Tron>
-[^16]: **Solana price (USD)** = 66.51 (usd) — CoinGecko, fetched 2026-06-12T22:05:43.656015+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^1]: **Bitcoin 24h change (%)** = -0.16 (pct) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^2]: **Ethereum 24h change (%)** = -0.98 (pct) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^3]: **Solana 24h change (%)** = -0.60 (pct) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^4]: **Bitcoin price (USD)** = 63,481.00 (usd) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^5]: **Ethereum price (USD)** = 1,663.14 (usd) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^6]: **Solana price (USD)** = 66.56 (usd) — CoinGecko, fetched 2026-06-12T22:17:29.400458+00:00 — <https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_market_cap=true>
+[^7]: **Ethereum chain TVL (USD)** = 37,626,321,481.64 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/Ethereum>
+[^8]: **BSC chain TVL (USD)** = 5,252,714,981.74 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/BSC>
+[^9]: **Solana chain TVL (USD)** = 4,685,223,682.14 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/Solana>
+[^10]: **Tron chain TVL (USD)** = 4,365,170,581.94 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/Tron>
+[^11]: **Bitcoin chain TVL (USD)** = 4,196,992,910.81 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/Bitcoin>
+[^12]: **Base chain TVL (USD)** = 4,014,392,145.02 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/chain/Base>
+[^13]: **Morpho Blue TVL (USD)** = 6,632,093,252.86 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/morpho-blue>
+[^14]: **Aave V3 TVL (USD)** = 11,779,654,323.24 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/aave-v3>
+[^15]: **Lido TVL (USD)** = 14,866,016,587.71 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/lido>
+[^16]: **Binance staked ETH TVL (USD)** = 6,169,472,177.97 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/binance-staked-eth>
+[^17]: **SSV Network TVL (USD)** = 12,273,361,689.94 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/ssv-network>
+[^18]: **Ethena USDe TVL (USD)** = 4,484,774,993.33 (usd) — DefiLlama, fetched 2026-06-12T22:17:29.400458+00:00 — <https://defillama.com/protocol/ethena-usde>
 
 ---
 *Published autonomously by [Recoil Sentinel](https://github.com/) — every numeric claim is machine-verified against its cited source before this file is written. A failed verification blocks publication (exit 1).*

@@ -170,22 +170,24 @@ def composio_publish_action(
 # ---------------------------------------------------------------------------
 
 def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
-    """Publish a verified report to cited.md via the Senso API. Only fires after
-    the report has PASSED claim verification — so cited.md only ever receives
-    machine-verified, grounded content. Returns a status string."""
+    """Publish a verified report to Senso (the platform behind cited.md) via the
+    real API (apiv2.senso.ai, POST /org/kb/raw). Only fires after the report has
+    PASSED claim verification — so Senso only ever receives machine-verified,
+    grounded content. Returns a status string with the Senso content id."""
     if not config.SENSO_API_KEY:
         return "skipped (set SENSO_API_KEY to publish to cited.md)"
     try:
         resp = httpx.post(
-            f"{config.SENSO_API_BASE}/content/raw",
+            f"{config.SENSO_API_BASE}/org/kb/raw",
             headers={"X-API-Key": config.SENSO_API_KEY, "Content-Type": "application/json"},
             json={"title": title[:120], "summary": summary[:480], "text": markdown},
             timeout=max(config.EXTERNAL_TIMEOUT_S, 30.0),
         )
         if resp.status_code in (200, 201, 202):
             data = resp.json() if resp.content else {}
-            cid = data.get("id") or data.get("content_id") or data.get("contentId") or ""
-            return f"published to cited.md (Senso content {cid})" if cid else "published to cited.md"
+            cid = data.get("id") or data.get("content_id") or ""
+            status = data.get("processing_status", "queued")
+            return f"published to cited.md via Senso (content {cid}, {status})"
         return f"degraded (Senso {resp.status_code}: {resp.text[:160]})"
     except Exception as exc:
         log.warning("senso/cited.md publish degraded: %s", exc)

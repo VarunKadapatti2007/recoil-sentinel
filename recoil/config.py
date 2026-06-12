@@ -81,7 +81,7 @@ COMPOSIO_GITHUB_REPO = os.environ.get("COMPOSIO_GITHUB_REPO", "recoil-sentinel")
 
 # Senso / cited.md: publish verified reports to the agentic content layer
 SENSO_API_KEY = os.environ.get("SENSO_API_KEY", "")
-SENSO_API_BASE = os.environ.get("SENSO_API_BASE", "https://sdk.senso.ai/api/v1")
+SENSO_API_BASE = os.environ.get("SENSO_API_BASE", "https://apiv2.senso.ai/api/v1")
 
 # ClickHouse Cloud: run/event analytics store
 CLICKHOUSE_HOST = os.environ.get("CLICKHOUSE_HOST", "")
