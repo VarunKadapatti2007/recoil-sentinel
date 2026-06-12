@@ -76,12 +76,18 @@ report PASSES verification (cited.md only receives machine-verified content). Wi
 the CLI [5/5] block and POST /api/sentinel/run (integrations.senso_cited_md). Config:
 SENSO_API_KEY + SENSO_API_BASE; added to .env/.env.example/render.yaml. Graceful no-op without
 key (verified). pytest 22/22.
-ACTION REQUIRED (user): get a SENSO_API_KEY at senso.ai/docs.senso.ai, put it in .env (and
-Render dashboard), then do ONE live `recoil sentinel` run to confirm a real 202 + content id
-(the end-to-end publish to cited.md could NOT be confirmed without the key — the API
-field names came from docs/search, not a verified live call; the code logs the raw Senso
-response and degrades gracefully if a field differs). NOTE: also strengthens "Best Use of
-Senso.ai" prize.
+RESOLVED LIVE (later 2026-06-12): user's key `tgr_...` IS valid (Senso keys use tgr_ prefix;
+`senso whoami` confirmed org "Varun Kadapatti"). The web-search API details were WRONG — real
+API found by inspecting the installed @senso-ai/cli: base `https://apiv2.senso.ai/api/v1`,
+header `X-API-Key`, endpoints under `/org/...`. Working publish = POST /org/kb/raw with
+{title, summary, text} -> 202 + content id + processing_status. Fixed config default base +
+endpoint; VERIFIED live: `recoil sentinel` printed "published to cited.md via Senso (content
+375acc62…, processing)". Useful endpoints: GET /org/me (whoami), /org/credits/balance,
+/org/content-engine/publish (citeable publish), /org/kb/my-files, /org/search/content.
+HONEST NUANCE: /org/kb/raw ingests into the org's Senso knowledge base (real, working). The
+org currently has enable_content_generation=false and content_auto_publish=false, so public
+visibility on the cited.md PAGE likely needs the Senso onboarding skill / enabling auto-publish
+(a Senso-side config), not just the ingest. Strengthens "Best Use of Senso.ai" prize either way.
 
 ### 2026-06-12 — Verification Console UI (the presentation layer judges see)
 
