@@ -65,6 +65,19 @@
 
 ## Changelog
 
+### 2026-06-12 — Verification Console UI (the presentation layer judges see)
+
+New dashboard page `web/app/verify/page.tsx` (nav "Verify (live)") — a chat-style console
+that makes the invisible mechanism VISIBLE: pick Market or Wallet, type an instruction/focus,
+optional "inject a false claim" toggle, Run. Renders the full workflow: (1) ground-truth
+facts (clickable to source), (2) the agent's claims, (3) a claim-by-claim verification table
+(claimed vs ground truth, ✓ match / ✕ MISMATCH), (4) PASS→published or BLOCK→refused+frozen
+with the reason. Backed by enriched `/api/sentinel/run` and `/api/wallet/verify` (added shared
+`_verification_view` returning ground_truth + findings + verification.checks; both now also
+return domain/subject_label). New api.ts helpers runMarketVerification/runWalletVerification +
+VerificationRun type. next build clean (/verify 4.44kB); pytest 22/22. This is the
+"show judges exactly what's verified and why" surface the user asked for.
+
 ### 2026-06-12 — On-chain TRANSACTION INTEGRITY (Coinbase/Base wallet) — plug-and-play proof
 
 The "plug and play in any domain" thesis proven: SAME engine (generate->verify->gate->
