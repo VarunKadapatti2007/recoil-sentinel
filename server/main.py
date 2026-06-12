@@ -600,15 +600,20 @@ def sentinel_latest() -> dict[str, Any]:
 
 
 @app.post("/api/sentinel/run")
-def sentinel_run() -> dict[str, Any]:
+def sentinel_run(
+    focus: Optional[str] = Query(None, description="Steer the analysis to a slice of the market"),
+    tamper: bool = Query(
+        False, description="DEMO: inject a false claim to show the verifier catch it"
+    ),
+) -> dict[str, Any]:
     """Trigger a real autonomous run on demand: live ground truth -> live model ->
     verify every claim -> publish cited.md on PASS (+ fire sponsor integrations).
     Costs one live model call (~$0.025) and takes ~30s. This is the 'watch it work
-    in real time' endpoint for the demo."""
+    in real time' endpoint for the demo. ?tamper=true shows a BLOCK live."""
     import time
 
     from recoil.sentinel import fetch_snapshot, generate_report, publish_report, verify_report
-    from recoil.sentinel.agent import SentinelError
+    from recoil.sentinel.agent import SentinelError, tamper_report
     from recoil.sentinel.gate import freeze_failure
     from recoil.sentinel.integrations import (
         airbyte_ground_truth_check,
@@ -618,6 +623,7 @@ def sentinel_run() -> dict[str, Any]:
     from recoil.sentinel.sources import SourceError
 
     conn = _conn()
+    fault_note = None
     try:
         t0 = time.perf_counter()
         try:
@@ -626,9 +632,11 @@ def sentinel_run() -> dict[str, Any]:
             raise HTTPException(status_code=503, detail=f"ground-truth sources unreachable: {exc}")
         fetch_ms = (time.perf_counter() - t0) * 1000
         try:
-            report, llm_stats = generate_report(snapshot)
+            report, llm_stats = generate_report(snapshot, focus=focus)
         except SentinelError as exc:
             raise HTTPException(status_code=502, detail=str(exc))
+        if tamper:
+            report, fault_note = tamper_report(report, snapshot)
         verification = verify_report(report, snapshot)
         result = publish_report(
             conn,
@@ -671,11 +679,13 @@ def sentinel_run() -> dict[str, Any]:
             "published": result["published"],
             "run_id": result["run_id"],
             "title": report.title,
+            "focus": focus,
+            "injected_fault": fault_note,
             "claims_verified": f"{ok}/{len(verification.checks)}",
             "cost_usd": llm_stats["cost_usd"],
             "problems": result.get("problems", []),
             "integrations": integrations,
-            "report_url": "/cited.md",
+            "report_url": "/cited.md" if result["published"] else None,
         }
     finally:
         conn.close()

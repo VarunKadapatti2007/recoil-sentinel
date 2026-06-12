@@ -69,9 +69,13 @@ class SentinelError(Exception):
     pass
 
 
-def generate_report(snapshot: dict[str, Any]) -> tuple[IntelReport, dict[str, Any]]:
+def generate_report(
+    snapshot: dict[str, Any], focus: Optional[str] = None
+) -> tuple[IntelReport, dict[str, Any]]:
     """Live model call. Returns (report, llm_stats). Raises SentinelError on failure —
-    Phase A is the real path; there is deliberately NO mock fallback here."""
+    Phase A is the real path; there is deliberately NO mock fallback here.
+    `focus` (optional) steers the analysis to a slice of the snapshot, e.g.
+    'the Solana ecosystem' or 'stablecoin TVL'."""
     if not config.ANTHROPIC_API_KEY:
         raise SentinelError("ANTHROPIC_API_KEY required: Sentinel runs on the live model only")
     try:
@@ -93,6 +97,11 @@ def generate_report(snapshot: dict[str, Any]) -> tuple[IntelReport, dict[str, An
         timeout=max(config.EXTERNAL_TIMEOUT_S, 60),
         max_retries=config.EXTERNAL_RETRIES,
     )
+    focus_line = (
+        f"\n\nFocus your analysis specifically on: {focus}. Only use metrics relevant to it."
+        if focus
+        else ""
+    )
     t0 = time.perf_counter()
     response = client.messages.parse(
         model=config.AGENT_MODEL,
@@ -105,6 +114,7 @@ def generate_report(snapshot: dict[str, Any]) -> tuple[IntelReport, dict[str, An
                     f"Live market snapshot fetched at {snapshot['fetched_at']} "
                     "(metric key -> data):\n"
                     + json.dumps(compact, indent=1, sort_keys=True)
+                    + focus_line
                     + "\n\nWrite the intelligence brief now."
                 ),
             }
@@ -190,3 +200,24 @@ def verify_report(report: IntelReport, snapshot: dict[str, Any]) -> Verification
                 )
 
     return VerificationResult(passed=not problems, checks=checks, problems=problems)
+
+
+def tamper_report(report: IntelReport, snapshot: dict[str, Any]) -> tuple[IntelReport, str]:
+    """FAULT INJECTION (demo only): plant a false numeric claim against a real
+    ground-truth metric so verification is GUARANTEED to fail — like chaos
+    engineering for the truth layer. Lets you SHOW the gate catch a wrong number
+    and refuse to publish, live. Returns the corrupted report + a description."""
+    key = next(iter(snapshot["metrics"]))
+    observed = float(snapshot["metrics"][key]["value"])
+    corrupted = observed * 10 + 1  # guaranteed outside the 1% tolerance
+    f0 = report.findings[0]
+    new_keys = list(dict.fromkeys([*f0.metric_keys, key]))
+    new_claims = {**f0.claimed_values, key: corrupted}
+    report.findings[0] = f0.model_copy(
+        update={"metric_keys": new_keys, "claimed_values": new_claims}
+    )
+    return (
+        report,
+        f"planted false claim '{key}' = {corrupted:,.0f} into finding 0 "
+        f"(ground truth ~ {observed:,.0f}) — verifier must reject this",
+    )
