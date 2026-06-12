@@ -65,6 +65,25 @@
 
 ## Changelog
 
+### 2026-06-12 — Demo-ability: --focus (customize) + --tamper (show the gate catch a lie)
+
+Problem: every run PASSED, so judges never SAW the verification mechanism do anything.
+Fix:
+- `recoil sentinel --focus "<topic>"` (+ ?focus= on /api/sentinel/run): steers the agent's
+  analysis to any slice (a chain, token, stablecoins, lending). User's innovation surface
+  within crypto. VERIFIED: focus "Solana ecosystem" → focused report, 16/16, PASS.
+- `recoil sentinel --tamper` (+ ?tamper=true): fault injection. `tamper_report(report,
+  snapshot)` plants a false numeric claim against a REAL ground-truth metric (value*10+1,
+  always outside tolerance) so verification is GUARANTEED to fail. VERIFIED: planted BTC
+  635,501 vs real 63,550 → verifier flagged it → publication REFUSED → failure FROZEN as
+  regression case → exit 1. cited.md untouched. THIS is the live demo of the internal
+  mechanism (PASS path vs BLOCK path). Cleaned the test-injected frozen case afterward so
+  the local DB starts clean.
+- 3-act demo sequence: (1) `recoil sentinel` → PASS+publish; (2) `recoil sentinel --tamper`
+  → BLOCK+freeze ("I made it lie, it caught itself"); (3) `recoil sentinel` again → step-0
+  replay gate shows the frozen case being re-checked ("it remembers").
+- pytest 22/22 still green.
+
 ### 2026-06-12 — DEPLOYED: live at https://recoil-api.onrender.com (Phase G COMPLETE)
 
 Blueprint synced; the boot-time autonomous run fired ON RENDER and was verified from
