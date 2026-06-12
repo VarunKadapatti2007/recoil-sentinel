@@ -65,6 +65,18 @@
 
 ## Changelog
 
+### 2026-06-12 — DEPLOYED: live at https://recoil-api.onrender.com (Phase G COMPLETE)
+
+Blueprint synced; the boot-time autonomous run fired ON RENDER and was verified from
+outside: /api/health 200; /cited.md 200 serving a cloud-generated report (run 6ebe9b37,
+11/11 claims verified); /api/sentinel/premium → HTTP 402 (paywall ACTIVE in prod);
+/api/sentinel/status shows published+paywall+ClickHouse stats; GitHub issue #4 opened
+autonomously from Render at 20:37 UTC. Next runs every 6h via the in-process scheduler.
+Hardening: ClickHouse integration timeout raised to 60s (cloud run's insert missed due
+to ClickHouse Cloud cold start — degraded gracefully as designed). All phases A-G done;
+remaining: optional Airbyte connection, optional x402 paying-client demo, 3-min
+recording + Devpost submission.
+
 ### 2026-06-12 — Phase G fix: Render cron can't mount disks → in-process scheduler
 
 Render blueprint validation rejected the two-service layout ("disks not supported for
