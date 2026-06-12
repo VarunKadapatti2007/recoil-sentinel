@@ -460,14 +460,12 @@ def _sentinel_once(
 
             ok_claims = sum(1 for c in verification.checks if c.ok)
             print(" [5/5] sponsor integrations:")
-            print(
-                "        senso→cited.md: "
-                + senso_publish_citeable(
-                    title=report.title,
-                    summary=report.executive_summary,
-                    markdown=_Path(result["path"]).read_text(encoding="utf-8"),
-                )
+            senso_status = senso_publish_citeable(
+                title=report.title,
+                summary=report.executive_summary,
+                markdown=_Path(result["path"]).read_text(encoding="utf-8"),
             )
+            print("        senso -> cited.md: " + senso_status)
             print(
                 "        clickhouse: "
                 + clickhouse_record_run(
