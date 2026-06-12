@@ -80,6 +80,46 @@ def _conn() -> sqlite3.Connection:
     return conn
 
 
+# ---------------------------------------------------------------------------
+# Built-in autonomy scheduler (Phase G): when RECOIL_SENTINEL_INTERVAL_S is
+# set (e.g. 21600 = 6h on Render), the API process itself runs the full
+# sentinel cycle on a timer — one service, no cron, no human in the loop.
+# ---------------------------------------------------------------------------
+import logging
+import os
+import threading
+
+_sched_log = logging.getLogger("recoil.scheduler")
+
+
+def _sentinel_loop(interval_s: int) -> None:
+    from recoil.cli import _sentinel_once
+
+    while True:
+        try:
+            code = _sentinel_once(out=None, skip_gate=False)
+            _sched_log.info("scheduled sentinel run finished with exit %s", code)
+        except Exception as exc:  # the scheduler must survive anything
+            _sched_log.error("scheduled sentinel run crashed: %s", exc)
+        threading.Event().wait(interval_s)
+
+
+@app.on_event("startup")
+def _start_sentinel_scheduler() -> None:
+    raw = os.environ.get("RECOIL_SENTINEL_INTERVAL_S", "").strip()
+    if not raw:
+        return
+    try:
+        interval_s = max(int(raw), 300)
+    except ValueError:
+        _sched_log.error("invalid RECOIL_SENTINEL_INTERVAL_S=%r — scheduler disabled", raw)
+        return
+    threading.Thread(
+        target=_sentinel_loop, args=(interval_s,), daemon=True, name="sentinel-scheduler"
+    ).start()
+    _sched_log.info("sentinel scheduler started: every %ss (first run now)", interval_s)
+
+
 def _label_map(conn: sqlite3.Connection) -> dict[str, str]:
     return {v["id"]: v["label"] for v in db.list_versions(conn)}
 

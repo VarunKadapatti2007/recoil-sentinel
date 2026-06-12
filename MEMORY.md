@@ -65,6 +65,18 @@
 
 ## Changelog
 
+### 2026-06-12 — Phase G fix: Render cron can't mount disks → in-process scheduler
+
+Render blueprint validation rejected the two-service layout ("disks not supported for
+cron jobs"; Render disks are per-service anyway, never shared). Fix: ONE web service —
+`server/main.py` now has a built-in scheduler (startup hook + daemon thread) that runs
+the full sentinel cycle every `RECOIL_SENTINEL_INTERVAL_S` seconds (Render sets 21600;
+min clamped to 300; first run fires at boot; loop survives any exception). render.yaml
+rewritten to a single service. VERIFIED locally: server on :8788 with the env set ran
+the whole pipeline autonomously in-process (20/20 claims, published, ClickHouse row 3,
+GitHub issue #3) while the API stayed responsive mid-run. Unset env = scheduler off
+(local default).
+
 ### 2026-06-12 — Phases B+C+D+E SHIPPED: all sponsor integrations LIVE-VERIFIED
 
 **What:** `recoil/sentinel/integrations.py` + x402 middleware in `server/main.py`.

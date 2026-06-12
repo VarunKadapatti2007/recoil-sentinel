@@ -1,17 +1,13 @@
 # Render blueprint — Recoil Sentinel, always-on autonomous deploy (Phase G).
-# Deploy: push this repo to GitHub -> Render dashboard -> New + Blueprint.
-# Set ANTHROPIC_API_KEY in the Render dashboard (never commit it).
+# Deploy: Render dashboard -> New + Blueprint -> select this repo.
+# Set the sync:false env vars in the Render dashboard (values from your .env).
 #
-# Two services:
-#   1. recoil-api  — serves /cited.md (the public artifact), the dashboard API,
-#                    and the sentinel status endpoints.
-#   2. recoil-sentinel-cron — runs `recoil sentinel` on a schedule, fully
-#                    autonomously: replay-gate -> live data -> live model ->
-#                    verify -> publish. No human in the loop.
-#
-# NOTE: services share state via the persistent disk mounted at /data
-# (RECOIL_DATA_DIR). cited.md is written into /data as well so the API can
-# serve the cron's output.
+# ONE web service does everything:
+#   - serves /cited.md (the public artifact), the dashboard API, the x402-
+#     paywalled premium endpoint, and the sentinel status endpoints
+#   - runs the sentinel cycle AUTONOMOUSLY every 6 hours via the built-in
+#     scheduler (RECOIL_SENTINEL_INTERVAL_S) — first run fires at boot.
+# (Render cron jobs cannot mount disks, so the scheduler lives in-process.)
 
 services:
   - type: web
@@ -27,57 +23,16 @@ services:
     envVars:
       - key: RECOIL_DATA_DIR
         value: /data
+      - key: RECOIL_CITED_PATH
+        value: /data/cited.md
+      - key: RECOIL_SENTINEL_INTERVAL_S
+        value: "21600" # autonomous run every 6h, first run at boot
       - key: RECOIL_JUDGE_PROVIDER
         value: anthropic
       - key: ANTHROPIC_API_KEY
         sync: false # set in dashboard
       - key: RECOIL_DEMO_MODE
         value: "false"
-      - key: RECOIL_CITED_PATH
-        value: /data/cited.md
-      - key: X402_WALLET_ADDRESS
-        sync: false
-      - key: X402_NETWORK
-        value: base-sepolia
-      - key: COMPOSIO_API_KEY
-        sync: false
-      - key: COMPOSIO_USER_ID
-        sync: false
-      - key: COMPOSIO_CONNECTED_ACCOUNT_ID
-        sync: false
-      - key: CLICKHOUSE_HOST
-        sync: false
-      - key: CLICKHOUSE_PASSWORD
-        sync: false
-      - key: AIRBYTE_CLIENT_ID
-        sync: false
-      - key: AIRBYTE_CLIENT_SECRET
-        sync: false
-      - key: AIRBYTE_WORKSPACE_ID
-        sync: false
-
-  - type: cron
-    name: recoil-sentinel-cron
-    runtime: python
-    plan: starter
-    schedule: "0 */6 * * *" # every 6 hours — autonomous, no manual trigger
-    buildCommand: pip install -e ".[sentinel]"
-    startCommand: python -m recoil.cli sentinel
-    disk:
-      name: recoil-data
-      mountPath: /data
-      sizeGB: 1
-    envVars:
-      - key: RECOIL_DATA_DIR
-        value: /data
-      - key: RECOIL_JUDGE_PROVIDER
-        value: anthropic
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: RECOIL_DEMO_MODE
-        value: "false"
-      - key: RECOIL_CITED_PATH
-        value: /data/cited.md
       - key: X402_WALLET_ADDRESS
         sync: false
       - key: X402_NETWORK
