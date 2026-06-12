@@ -65,6 +65,32 @@
 
 ## Changelog
 
+### 2026-06-12 — On-chain TRANSACTION INTEGRITY (Coinbase/Base wallet) — plug-and-play proof
+
+The "plug and play in any domain" thesis proven: SAME engine (generate->verify->gate->
+freeze), ground-truth source swapped from CoinGecko/DefiLlama to the BLOCKCHAIN via
+keyless JSON-RPC.
+- `recoil/sentinel/onchain.py`: `fetch_wallet_snapshot(address, network)` reads live
+  ETH balance (eth_getBalance), nonce (eth_getTransactionCount), USDC balance (ERC-20
+  balanceOf eth_call), chainId — returns the STANDARD snapshot shape so it flows through
+  the existing generate_report/verify_report/tamper_report unchanged. Also
+  `fetch_transaction_snapshot(tx_hash)` (verify a specific tx; missing tx = caught
+  failure). Keyless Base RPC: sepolia.base.org / mainnet.base.org. USDC contracts +
+  Basescan explorer links baked in.
+- `recoil verify-wallet [--address --network --tamper]`: fetch chain -> agent claims ->
+  verify EVERY claim vs chain -> publish wallet_integrity.md on PASS, BLOCK+freeze on
+  mismatch. `POST /api/wallet/verify?tamper=` mirrors it for the deployed site/UI.
+- VERIFIED LIVE against the user's real wallet (0xad6D…, base-sepolia, chain 84532,
+  empty: 0 ETH/0 USDC/nonce 0): PASS path 7/7 claims grounded -> published; --tamper
+  planted "1 ETH" -> verifier caught it vs chain's 0 -> BLOCKED, nothing published,
+  frozen. exit 1. THIS is the transaction-integrity demo: an AI that can't lie about
+  (or mis-send) money. Pairs with the x402/CDP rails already wired.
+- pytest 22/22. Cleaned test-injected frozen case.
+
+The product now spans THREE verification domains on one engine: market intel, on-chain
+transaction integrity, and the original codebase/agent regression gate. That IS the
+plug-and-play story for judges.
+
 ### 2026-06-12 — Demo-ability: --focus (customize) + --tamper (show the gate catch a lie)
 
 Problem: every run PASSED, so judges never SAW the verification mechanism do anything.
