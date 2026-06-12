@@ -124,6 +124,26 @@ def _label_map(conn: sqlite3.Connection) -> dict[str, str]:
     return {v["id"]: v["label"] for v in db.list_versions(conn)}
 
 
+def _verification_view(snapshot: dict, report, verification) -> dict[str, Any]:
+    """Shared visual payload for the verification console: the ground-truth
+    facts, the agent's claims, and the per-claim check results."""
+    return {
+        "ground_truth": [
+            {
+                "key": k,
+                "label": m["label"],
+                "value": m["value"],
+                "unit": m["unit"],
+                "source": m["source"],
+                "source_url": m["source_url"],
+            }
+            for k, m in snapshot["metrics"].items()
+        ],
+        "findings": [f.model_dump() for f in report.findings],
+        "verification": verification.model_dump(),
+    }
+
+
 # ---------------------------------------------------------------------------
 # overview
 # ---------------------------------------------------------------------------
@@ -675,9 +695,11 @@ def sentinel_run(
                 verification=verification,
             )
         return {
+            "domain": "market",
             "verdict": result["verdict"],
             "published": result["published"],
             "run_id": result["run_id"],
+            "subject_label": focus or "Crypto market snapshot",
             "title": report.title,
             "focus": focus,
             "injected_fault": fault_note,
@@ -686,6 +708,7 @@ def sentinel_run(
             "problems": result.get("problems", []),
             "integrations": integrations,
             "report_url": "/cited.md" if result["published"] else None,
+            **_verification_view(snapshot, report, verification),
         }
     finally:
         conn.close()
@@ -745,14 +768,16 @@ def wallet_verify(
         if not verification.passed:
             freeze_failure(conn, run_id=run_id, report=report, snapshot=snap, verification=verification)
         return {
+            "domain": "wallet",
             "verdict": "PASS" if verification.passed else "BLOCK",
             "subject": subj,
-            "on_chain_truth": {k: v["value"] for k, v in snap["metrics"].items()},
+            "subject_label": f"Wallet {subj['address']} on {subj['network']}",
+            "title": report.title,
             "claims_verified": f"{ok}/{len(verification.checks)}",
             "injected_fault": fault_note,
             "problems": verification.problems,
-            "report": report.model_dump(),
             "run_id": run_id,
+            **_verification_view(snap, report, verification),
         }
     finally:
         conn.close()

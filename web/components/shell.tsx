@@ -10,6 +10,7 @@ import { TestAlertDialog } from "@/components/test-alert";
 
 const NAV = [
   { href: "/", label: "Overview" },
+  { href: "/verify", label: "Verify (live)" },
   { href: "/traces", label: "Traces" },
   { href: "/evals", label: "Eval suite" },
   { href: "/gate", label: "Gate / Publish" },
