@@ -557,6 +557,27 @@ def voice(verdict: str) -> FileResponse:
 # sentinel (the autonomous publisher)
 # ---------------------------------------------------------------------------
 
+@app.get("/")
+def index() -> dict[str, Any]:
+    """Self-documenting API root — so the bare URL isn't a 404."""
+    return {
+        "service": "Recoil Sentinel",
+        "what": "autonomous crypto-intelligence agent: live data -> live model -> "
+        "machine-verified claims -> published cited.md, gated so it can't repeat a mistake",
+        "demo_mode": config.DEMO_MODE,
+        "paywall_active": X402_ACTIVE,
+        "endpoints": {
+            "GET /cited.md": "the latest published report (the public artifact)",
+            "GET /api/sentinel/status": "run history + ClickHouse analytics + paywall state",
+            "GET /api/sentinel/latest": "machine-readable sidecar of the latest report",
+            "GET /api/sentinel/premium": "full report + verification evidence (x402-paywalled)",
+            "POST /api/sentinel/run": "trigger a real autonomous run on demand (~30s, ~$0.025)",
+            "GET /api/health": "liveness probe",
+        },
+        "repo": "https://github.com/VarunKadapatti2007/recoil-sentinel",
+    }
+
+
 @app.get("/cited.md")
 def cited_md():
     """The agent's published output — the public artifact."""
@@ -576,6 +597,88 @@ def sentinel_latest() -> dict[str, Any]:
     if not sidecar.exists():
         raise HTTPException(status_code=404, detail="no report published yet")
     return json.loads(sidecar.read_text(encoding="utf-8"))
+
+
+@app.post("/api/sentinel/run")
+def sentinel_run() -> dict[str, Any]:
+    """Trigger a real autonomous run on demand: live ground truth -> live model ->
+    verify every claim -> publish cited.md on PASS (+ fire sponsor integrations).
+    Costs one live model call (~$0.025) and takes ~30s. This is the 'watch it work
+    in real time' endpoint for the demo."""
+    import time
+
+    from recoil.sentinel import fetch_snapshot, generate_report, publish_report, verify_report
+    from recoil.sentinel.agent import SentinelError
+    from recoil.sentinel.gate import freeze_failure
+    from recoil.sentinel.integrations import (
+        airbyte_ground_truth_check,
+        clickhouse_record_run,
+        composio_publish_action,
+    )
+    from recoil.sentinel.sources import SourceError
+
+    conn = _conn()
+    try:
+        t0 = time.perf_counter()
+        try:
+            snapshot = fetch_snapshot()
+        except SourceError as exc:
+            raise HTTPException(status_code=503, detail=f"ground-truth sources unreachable: {exc}")
+        fetch_ms = (time.perf_counter() - t0) * 1000
+        try:
+            report, llm_stats = generate_report(snapshot)
+        except SentinelError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+        verification = verify_report(report, snapshot)
+        result = publish_report(
+            conn,
+            report=report,
+            snapshot=snapshot,
+            verification=verification,
+            llm_stats=llm_stats,
+            fetch_ms=fetch_ms,
+        )
+        ok = sum(1 for c in verification.checks if c.ok)
+        integrations: dict[str, str] = {}
+        if result["published"]:
+            integrations["clickhouse"] = clickhouse_record_run(
+                run_id=result["run_id"],
+                verdict="PASS",
+                claims_total=len(verification.checks),
+                claims_ok=ok,
+                findings=len(report.findings),
+                llm_stats=llm_stats,
+                title=report.title,
+            )
+            integrations["composio"] = composio_publish_action(
+                title=report.title,
+                summary=report.executive_summary,
+                run_id=result["run_id"],
+                claims_ok=ok,
+                claims_total=len(verification.checks),
+            )
+            integrations["airbyte"] = airbyte_ground_truth_check()
+        else:
+            freeze_failure(
+                conn,
+                run_id=result["run_id"],
+                report=report,
+                snapshot=snapshot,
+                verification=verification,
+            )
+        return {
+            "verdict": result["verdict"],
+            "published": result["published"],
+            "run_id": result["run_id"],
+            "title": report.title,
+            "claims_verified": f"{ok}/{len(verification.checks)}",
+            "cost_usd": llm_stats["cost_usd"],
+            "problems": result.get("problems", []),
+            "integrations": integrations,
+            "report_url": "/cited.md",
+        }
+    finally:
+        conn.close()
 
 
 @app.get("/api/sentinel/premium")
