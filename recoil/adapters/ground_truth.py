@@ -1,11 +1,10 @@
-"""Ground-truth provider adapter.
+"""ground-truth provider adapter.
 
-Default: a local JSON store ("what the human operator actually did") used to
-ground the judge. Interface-ready for an Airbyte-backed implementation that
-pulls resolutions from a ticketing system; the Airbyte path is intentionally
-not wired to an unverified API — it raises a clear error directing operators
-to the local store until a connector is configured. The integration story is
-true and demonstrable: swap providers via RECOIL_GROUND_TRUTH_PROVIDER.
+default is a local json store ("what the human operator actually did") used to
+ground the judge. there's an interface-ready airbyte version that would pull
+resolutions from a ticketing system, but it's not wired to an unverified api on
+purpose — it raises a clear error pointing operators at the local store until a
+connector is set up. swap providers via RECOIL_GROUND_TRUTH_PROVIDER.
 """
 
 from __future__ import annotations
@@ -24,11 +23,11 @@ class GroundTruthProvider(ABC):
 
     @abstractmethod
     def lookup(self, ref: str) -> Optional[dict[str, Any]]:
-        """Resolve a ground_truth_ref to a context snapshot, or None."""
+        """resolve a ground_truth_ref to a context snapshot, or none."""
 
 
 class LocalJSONGroundTruth(GroundTruthProvider):
-    """Reads data/frozen_evals/ground_truth.json — keyed by ref."""
+    """reads data/frozen_evals/ground_truth.json — keyed by ref."""
 
     name = "local"
 
@@ -50,8 +49,8 @@ class LocalJSONGroundTruth(GroundTruthProvider):
 
 
 class AirbyteGroundTruth(GroundTruthProvider):
-    """Interface-ready Airbyte connector path. Not load-bearing: activates only
-    when explicitly selected AND configured; otherwise instructs the operator."""
+    """interface-ready airbyte connector path. not load-bearing: only kicks in
+    when explicitly selected and configured; otherwise it tells the operator what to do."""
 
     name = "airbyte"
 

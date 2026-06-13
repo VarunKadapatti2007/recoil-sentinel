@@ -1,13 +1,11 @@
-"""Unit tests for the gate's regression logic — the soul of the product.
+"""tests for the gate's regression logic — the core of the thing.
 
-Covers every case demanded by the brief:
-- regression (baseline-pass + candidate-fail) -> BLOCK
-- no regression -> PASS
-- newly-fixed counted but not blocking
-- empty suite edge case
-- all-pass, all-fail
-plus the end-to-end DB-backed gate (BLOCK on v_regressed, PASS on v_fixed,
-exit-code parity) and cache/demo-mode behavior.
+covers the cases that matter:
+- regression (baseline pass + candidate fail) -> block
+- no regression -> pass
+- newly-fixed counted but doesn't block
+- empty suite + all-pass/all-fail edges
+plus the end-to-end db-backed gate and cache/demo-mode behavior.
 """
 
 from __future__ import annotations
@@ -76,7 +74,7 @@ def test_all_pass():
 
 
 def test_all_fail_is_not_a_regression():
-    # baseline already failed everything: candidate failing too is not a regression
+    # baseline already failed these, so candidate failing too isn't a regression
     cases = [_case(c) for c in "abc"]
     cls = classify_cases(cases, {c: False for c in "abc"}, {c: False for c in "abc"})
     assert verdict_for(cls) == "PASS"
@@ -97,7 +95,7 @@ def test_missing_candidate_result_is_an_error():
 
 
 # ---------------------------------------------------------------------------
-# end-to-end against a seeded database (the scripted demo path)
+# end-to-end against a seeded db (the scripted demo path)
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(scope="module")
@@ -144,7 +142,7 @@ def test_gate_passes_v_fixed(seeded_conn):
 
 
 def test_gate_serves_from_cache_in_demo_mode(seeded_conn):
-    """Demo determinism: every demo-path verdict must come from cache."""
+    """demo determinism: every demo-path verdict should come from cache."""
     from recoil import db
     from recoil.evals.runner import judge_case
 

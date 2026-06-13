@@ -1,5 +1,5 @@
-"""Sentinel Phase F tests: claim verification + freeze/replay regression gate.
-No model calls — the replay generator is injected."""
+"""sentinel tests: claim verification + freeze/replay regression gate.
+no model calls — we inject the replay generator."""
 
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def _report(btc_value: float, *, metric: str = "price:bitcoin") -> IntelReport:
 def test_verify_passes_exact_and_rounded():
     snap = _snapshot()
     assert verify_report(_report(63769.0), snap).passed
-    assert verify_report(_report(63800.0), snap).passed  # within 1% tolerance
+    assert verify_report(_report(63800.0), snap).passed  # within 1% tolerance, still ok
 
 
 def test_verify_fails_wrong_value():
@@ -142,13 +142,13 @@ def test_replay_fixed_then_regressed_blocks(conn):
     good = lambda snap: (_report(63769.0), {})  # noqa: E731
     bad = lambda snap: (_report(70000.0), {})  # noqa: E731
 
-    # agent fixed -> case passes, stamped fixed_in, verdict PASS
+    # agent fixed it -> case passes, gets stamped fixed_in, verdict pass
     result = replay_frozen_cases(conn, generate=good)
     assert result["verdict"] == "PASS"
     assert len(result["newly_fixed"]) == 1
     assert list_sentinel_cases(conn)[0]["fixed_in_version_id"] is not None
 
-    # agent breaks again -> previously-fixed case fails -> REGRESSION -> BLOCK
+    # agent breaks it again -> a fixed case fails -> regression -> block
     result = replay_frozen_cases(conn, generate=bad)
     assert result["verdict"] == "BLOCK"
     assert len(result["regressions"]) == 1
@@ -158,7 +158,7 @@ def test_replay_never_fixed_does_not_block(conn):
     _freeze_bad_report(conn)
     bad = lambda snap: (_report(70000.0), {})  # noqa: E731
     result = replay_frozen_cases(conn, generate=bad)
-    assert result["verdict"] == "PASS"  # still failing, never fixed: reported, not blocking
+    assert result["verdict"] == "PASS"  # still failing but never fixed: reported, doesn't block
     assert len(result["still_failing"]) == 1
 
 

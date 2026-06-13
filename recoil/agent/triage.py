@@ -1,10 +1,10 @@
-"""Execution of the agent under test.
+"""runs the agent under test.
 
-Two paths:
+two paths:
 - mock (default, deterministic, offline): the version's behavior profile.
-- live: calls the Anthropic API with the version's system prompt and a
-  structured-output schema. Wrapped with timeout/retries and a fallback to
-  the mock path so no exception can ever reach the demo path.
+- live: calls the anthropic api with the version's system prompt and a
+  structured-output schema. wrapped with timeout/retries and a fallback to the
+  mock path so no exception ever reaches the demo path.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ class TriageAgentError(Exception):
 def _simulated_spans(
     rng: random.Random, model: str, *, base_latency: Optional[float] = None
 ) -> tuple[list[Span], float, float]:
-    """Realistic APM-style spans: one llm span + 1-2 tool spans."""
+    """realistic apm-style spans: one llm span + 1-2 tool spans."""
     t = 0.0
     spans: list[Span] = []
     lookup_ms = rng.uniform(40, 180)
@@ -46,7 +46,7 @@ def _simulated_spans(
     llm_ms = base_latency if base_latency is not None else rng.uniform(600, 2400)
     prompt_tokens = rng.randint(420, 980)
     completion_tokens = rng.randint(60, 190)
-    # Sonnet-class pricing: $3/M in, $15/M out — fractions of a cent per run.
+    # sonnet-class pricing: $3/m in, $15/m out — fractions of a cent per run.
     cost = prompt_tokens * 3e-6 + completion_tokens * 15e-6
     spans.append(
         Span(
@@ -85,10 +85,10 @@ def _run_mock(version: dict[str, Any], input: dict[str, Any], rng: random.Random
 
 
 def _run_live(version: dict[str, Any], input: dict[str, Any]) -> TriageOutput:
-    """Live Anthropic call with structured output. Raises TriageAgentError on failure."""
+    """live anthropic call with structured output. raises TriageAgentError on failure."""
     try:
-        import anthropic  # lazy: optional dependency
-    except ImportError as exc:  # pragma: no cover - environment dependent
+        import anthropic  # lazy import, optional dep
+    except ImportError as exc:  # pragma: no cover - depends on environment
         raise TriageAgentError("anthropic SDK not installed") from exc
 
     client = anthropic.Anthropic(
@@ -127,9 +127,9 @@ def run_agent(
     live: bool = False,
     seed: Optional[int] = None,
 ) -> dict[str, Any]:
-    """Execute the agent and return a trace payload:
+    """run the agent and return a trace payload:
     {output, spans, latency_ms, total_cost_usd, ground_truth_ref}
-    Never raises on the demo path — live failures fall back to mock with a loud log.
+    never raises on the demo path — live failures fall back to mock with a loud log.
     """
     rng = random.Random(seed)
     start = time.perf_counter()

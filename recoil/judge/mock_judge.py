@@ -1,9 +1,8 @@
-"""Deterministic, grounded mock judge.
+"""deterministic mock judge, grounded in real data.
 
-Grades the agent's structured output field-by-field against the ground-truth
-expectations captured in the case's context snapshot. This is the zero-network
-default and the engine behind cache pre-warming during seeding: the verdicts
-are real, reproducible judgments grounded in the captured truth — not vibes.
+checks the agent's output field-by-field against the expected values in the
+case's context snapshot. this is the no-network default and what pre-warms the
+cache during seeding — the verdicts are real and reproducible, not vibes.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from ..models import JudgeVerdict
 from .base import Judge
 
 _PII_PATTERNS = [
-    re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),          # SSN
+    re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),          # ssn
     re.compile(r"\b(?:\d[ -]?){13,16}\b"),          # card number
 ]
 

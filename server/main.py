@@ -1,7 +1,7 @@
-"""Recoil API server: read APIs for the dashboard + SSE gate streaming.
+"""recoil api server: read apis for the dashboard + sse gate streaming.
 
-Defensive by design: clean 404s on missing records, never a raw 500 on the
-demo path. CORS pinned to the local web origin.
+defensive on purpose: clean 404s on missing records, never a raw 500 on the
+demo path. cors pinned to the local web origin.
 """
 
 from __future__ import annotations
@@ -30,10 +30,10 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# x402 paywall (Phase E): the premium report endpoint is monetized via the
-# Coinbase HTTP-402 standard. Activates only when a wallet is configured AND
-# the x402 SDK is installed; otherwise the endpoint stays open with a notice.
-# Testnet (base-sepolia) uses the public facilitator at x402.org.
+# x402 paywall: the premium report endpoint gets monetized via coinbase's
+# http-402 standard. only kicks in when a wallet is set and the x402 sdk is
+# installed, otherwise the endpoint stays open. testnet (base-sepolia) uses
+# the public facilitator at x402.org.
 # ---------------------------------------------------------------------------
 X402_ACTIVE = False
 if config.X402_WALLET_ADDRESS:
@@ -68,7 +68,7 @@ if config.X402_WALLET_ADDRESS:
             server=_x402_server,
         )
         X402_ACTIVE = True
-    except Exception as _exc:  # paywall must never take the API down
+    except Exception as _exc:  # paywall should never take the api down
         import logging as _logging
 
         _logging.getLogger("recoil.server").warning("x402 paywall disabled: %s", _exc)
@@ -81,9 +81,9 @@ def _conn() -> sqlite3.Connection:
 
 
 # ---------------------------------------------------------------------------
-# Built-in autonomy scheduler (Phase G): when RECOIL_SENTINEL_INTERVAL_S is
-# set (e.g. 21600 = 6h on Render), the API process itself runs the full
-# sentinel cycle on a timer — one service, no cron, no human in the loop.
+# built-in autonomy scheduler: when RECOIL_SENTINEL_INTERVAL_S is set (e.g.
+# 21600 = 6h), the api process runs the full sentinel cycle on a timer —
+# one service, no cron, no human in the loop.
 # ---------------------------------------------------------------------------
 import logging
 import os
@@ -99,7 +99,7 @@ def _sentinel_loop(interval_s: int) -> None:
         try:
             code = _sentinel_once(out=None, skip_gate=False)
             _sched_log.info("scheduled sentinel run finished with exit %s", code)
-        except Exception as exc:  # the scheduler must survive anything
+        except Exception as exc:  # scheduler has to survive anything
             _sched_log.error("scheduled sentinel run crashed: %s", exc)
         threading.Event().wait(interval_s)
 
@@ -125,8 +125,8 @@ def _label_map(conn: sqlite3.Connection) -> dict[str, str]:
 
 
 def _verification_view(snapshot: dict, report, verification) -> dict[str, Any]:
-    """Shared visual payload for the verification console: the ground-truth
-    facts, the agent's claims, and the per-claim check results."""
+    """shared payload for the verification console: ground-truth facts, the
+    agent's claims, and the per-claim check results."""
     return {
         "ground_truth": [
             {
@@ -178,7 +178,7 @@ def overview() -> dict[str, Any]:
         latencies = sorted(r["latency_ms"] for r in runs_today) or [0]
         p95 = latencies[int(len(latencies) * 0.95) - 1] if len(latencies) > 1 else latencies[0]
 
-        # pass-rate-over-time sparkline: chronological per-version suite rates
+        # pass-rate-over-time sparkline: per-version suite rates in order
         return {
             "total_runs": db.count_runs(conn),
             "total_cases": len(cases),
@@ -234,7 +234,7 @@ def runs(limit: int = Query(50, le=200), offset: int = 0) -> dict[str, Any]:
         for r in items:
             r["version_label"] = labels.get(r["agent_version_id"], "?")
             r["span_count"] = len(r["spans"])
-            del r["spans"]  # list view stays light
+            del r["spans"]  # keep the list view light
         return {"items": items, "total": db.count_runs(conn)}
     finally:
         conn.close()
@@ -260,8 +260,8 @@ class TestAlertRequest(BaseModel):
 
 @app.post("/api/runs")
 def send_test_alert(req: TestAlertRequest) -> dict[str, Any]:
-    """'Send test alert': fire a real agent run, capture the trace, judge it,
-    and (on FAIL) promote it into the suite — the capture->judge->freeze loop."""
+    """'send test alert': fire a real agent run, capture the trace, judge it,
+    and on fail promote it into the suite — the capture->judge->freeze loop."""
     conn = _conn()
     try:
         version = db.resolve_version(conn, req.version_label)
@@ -350,7 +350,7 @@ def case_diff(
     baseline: str = Query(...),
     candidate: str = Query(...),
 ) -> dict[str, Any]:
-    """Field-by-field semantic diff of structured outputs for the hero screen."""
+    """field-by-field diff of structured outputs for the hero screen."""
     conn = _conn()
     try:
         case = db.get_eval_case(conn, case_id)
@@ -430,9 +430,9 @@ async def gate_stream(
     publish: bool = Query(False),
     case_delay_ms: int = Query(420, ge=0, le=2000),
 ) -> StreamingResponse:
-    """SSE stream of a gate run, case by case, then the final verdict.
+    """sse stream of a gate run, case by case, then the final verdict.
 
-    Events:
+    events:
       start    {candidate, baseline, total_cases}
       case     {index, case_id, title, severity, baseline_passed, candidate_passed, kind, ...}
       verdict  {verdict, passed_count, failed_count, regressed, newly_fixed, published, gate_run_id}
@@ -471,7 +471,7 @@ async def gate_stream(
             }
             cand_results: dict[str, bool] = {}
             for i, case in enumerate(cases):
-                # legible pacing for the live audience; cached verdicts resolve instantly otherwise
+                # slow it down so the live audience can follow; cached verdicts are instant anyway
                 if case_delay_ms:
                     await asyncio.sleep(case_delay_ms / 1000)
                 result = await asyncio.to_thread(judge_case, conn, case, cand_v)
@@ -540,7 +540,7 @@ async def gate_stream(
                     "gate_run_id": gate_run_id,
                 },
             )
-        except Exception as exc:  # never let a raw exception reach the stream
+        except Exception as exc:  # don't let a raw exception hit the stream
             yield _sse("error", {"message": f"gate stream failed: {exc}"})
         finally:
             conn.close()
@@ -579,7 +579,7 @@ def voice(verdict: str) -> FileResponse:
 
 @app.get("/")
 def index() -> dict[str, Any]:
-    """Self-documenting API root — so the bare URL isn't a 404."""
+    """self-documenting api root, so the bare url isn't a 404."""
     return {
         "service": "Recoil Sentinel",
         "what": "autonomous crypto-intelligence agent: live data -> live model -> "
@@ -600,7 +600,7 @@ def index() -> dict[str, Any]:
 
 @app.get("/cited.md")
 def cited_md():
-    """The agent's published output — the public artifact."""
+    """the agent's published output — the public artifact."""
     from recoil.sentinel.publish import CITED_MD_PATH
 
     if not CITED_MD_PATH.exists():
@@ -610,7 +610,7 @@ def cited_md():
 
 @app.get("/api/sentinel/latest")
 def sentinel_latest() -> dict[str, Any]:
-    """Machine-readable sidecar of the latest published report."""
+    """machine-readable sidecar of the latest published report."""
     from recoil.sentinel.publish import CITED_MD_PATH
 
     sidecar = CITED_MD_PATH.with_suffix(".json")
@@ -626,10 +626,10 @@ def sentinel_run(
         False, description="DEMO: inject a false claim to show the verifier catch it"
     ),
 ) -> dict[str, Any]:
-    """Trigger a real autonomous run on demand: live ground truth -> live model ->
-    verify every claim -> publish cited.md on PASS (+ fire sponsor integrations).
-    Costs one live model call (~$0.025) and takes ~30s. This is the 'watch it work
-    in real time' endpoint for the demo. ?tamper=true shows a BLOCK live."""
+    """kick off a real autonomous run on demand: live ground truth -> live model ->
+    verify every claim -> publish cited.md on pass (+ fire sponsor integrations).
+    one live model call (~$0.025), takes ~30s. this is the 'watch it work live'
+    endpoint for the demo. ?tamper=true shows a block."""
     import time
 
     from recoil.sentinel import fetch_snapshot, generate_report, publish_report, verify_report
@@ -727,8 +727,8 @@ def wallet_verify(
     network: Optional[str] = Query(None, description="base-sepolia | base"),
     tamper: bool = Query(False, description="DEMO: inject a false on-chain claim"),
 ) -> dict[str, Any]:
-    """Verify a wallet's on-chain integrity live: read chain state -> agent claims ->
-    verify EVERY claim against the blockchain. tamper=true shows a BLOCK. The
+    """check a wallet's on-chain integrity live: read chain state -> agent claims ->
+    verify every claim against the blockchain. tamper=true shows a block. the
     transaction-integrity proof: an agent that can't lie about money."""
     from recoil.sentinel.agent import (
         SentinelError,
@@ -792,9 +792,9 @@ def wallet_verify(
 
 @app.get("/api/sentinel/premium")
 def sentinel_premium() -> dict[str, Any]:
-    """Premium intel: full report + per-claim verification evidence.
-    Behind the x402 paywall when configured — an agent (or human) must pay
-    {X402_PRICE} in USDC on {X402_NETWORK} to unlock."""
+    """premium intel: full report + per-claim verification evidence.
+    sits behind the x402 paywall when configured — an agent (or human) pays
+    {X402_PRICE} in usdc on {X402_NETWORK} to unlock."""
     from recoil.sentinel.publish import CITED_MD_PATH
 
     sidecar = CITED_MD_PATH.with_suffix(".json")

@@ -1,13 +1,13 @@
-"""THE core: regression detection + verdict + exit codes.
+"""the core: spot regressions, give a verdict, set exit codes.
 
-classify_cases() is a pure function over (cases, baseline results, candidate
-results) so the regression logic is directly unit-testable:
+classify_cases() is pure over (cases, baseline results, candidate results) so
+the regression logic is easy to unit-test:
 
-- regression   = baseline passed AND candidate failed  -> BLOCK
-- newly_fixed  = baseline failed AND candidate passed  -> counted, not blocking
+- regression   = baseline passed but candidate failed  -> BLOCK
+- newly_fixed  = baseline failed but candidate passed  -> counted, not blocking
 - still_passing / still_failing / new_case             -> not blocking
 
-Verdict = BLOCK iff any regression exists, else PASS.
+verdict = BLOCK if there's any regression, otherwise PASS.
 """
 
 from __future__ import annotations
@@ -29,11 +29,11 @@ def classify_cases(
     baseline_results: dict[str, bool | None],
     candidate_results: dict[str, bool],
 ) -> list[CaseClassification]:
-    """Classify each case by (baseline_passed, candidate_passed).
+    """bucket each case by (baseline_passed, candidate_passed).
 
-    baseline_results maps case_id -> passed (None/absent = no baseline result,
-    i.e. a case newer than the baseline). candidate_results maps case_id ->
-    passed and must cover every case.
+    baseline_results maps case_id -> passed (None/missing = no baseline result,
+    i.e. the case is newer than the baseline). candidate_results maps case_id
+    -> passed and has to cover every case.
     """
     classifications: list[CaseClassification] = []
     for case in cases:
@@ -79,8 +79,8 @@ def run_gate(
     persist: bool = True,
     on_case: Optional[Callable[[dict[str, Any], dict[str, Any]], None]] = None,
 ) -> GateReport:
-    """Resolve versions, run the candidate against every active case, classify
-    against the baseline's latest results, persist a gate_runs row, return report.
+    """resolve versions, run the candidate over every active case, classify
+    against the baseline's latest results, save a gate_runs row, return the report.
     """
     cand_v = db.resolve_version(conn, candidate)
     if cand_v is None:
@@ -97,13 +97,13 @@ def run_gate(
 
     cases = db.list_eval_cases(conn, status="active")
 
-    # Candidate: run (or read cached) results for every active case.
+    # candidate: run (or read cached) results for every active case
     cand_results_list = run_suite_for_version(
         conn, cand_v, use_cache=use_cache, live_agent=live_agent, on_case=on_case
     )
     cand_results = {r["eval_case_id"]: r["passed"] for r in cand_results_list}
 
-    # Baseline: latest persisted result per case (never re-run on the gate path).
+    # baseline: latest saved result per case (never re-run on the gate path)
     base_results: dict[str, bool | None] = {
         r["eval_case_id"]: r["passed"] for r in db.list_results_for_version(conn, base_v["id"])
     }

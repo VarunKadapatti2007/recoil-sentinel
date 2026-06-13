@@ -1,20 +1,20 @@
-"""Seed a believable production history + the frozen 12-case regression suite.
+"""seed a believable prod history + the frozen 12-case regression suite.
 
-Everything here is deterministic (seeded RNG, mock judge, behavior profiles),
-so `recoil reset --demo` restores a byte-stable demo state in well under 2s,
-and every cached verdict is a real, reproducible judgment grounded in the
-captured context snapshots.
+everything here is deterministic (seeded rng, mock judge, behavior profiles),
+so `recoil reset --demo` rebuilds a byte-stable demo state in well under 2s,
+and every cached verdict is a real, reproducible call grounded in the captured
+context snapshots.
 
-What gets seeded:
+what we seed:
 - 5 agent versions: v1 -> v2 -> v_good (published) -> v_regressed / v_fixed
-- ~250 production runs across v1/v2/v_good over a ~18-day window with
-  realistic varied latencies, token counts, and per-run cost
+- ~250 prod runs across v1/v2/v_good over a ~18-day window, with varied
+  latencies, token counts, and per-run cost
 - exactly 12 frozen eval cases, each promoted from a real seeded failure run
-  (the promotion pipeline itself is exercised, not faked)
-- cached judge verdicts for v_good / v_regressed / v_fixed (and the historical
-  versions) against all 12 cases — the demo's BLOCK/PASS path is fully cached
-- one historical gate run (v_good vs v2, PASS) so the dashboard opens green
-- the local ground-truth store + (optionally) pre-rendered voice verdicts
+  (we actually run the promotion pipeline, don't fake it)
+- cached judge verdicts for v_good / v_regressed / v_fixed (and the old
+  versions) against all 12 cases — the demo's block/pass path is fully cached
+- one old gate run (v_good vs v2, pass) so the dashboard opens green
+- the local ground-truth store + optionally pre-rendered voice verdicts
 """
 
 from __future__ import annotations
@@ -39,8 +39,8 @@ RUN_COUNT = 250
 WINDOW_DAYS = 18
 
 # ---------------------------------------------------------------------------
-# The 12 frozen case definitions (brief §7 archetypes). `first_failed` names
-# the historical version whose real failure run gets promoted into the case.
+# the 12 frozen case defs (brief §7 archetypes). `first_failed` is the old
+# version whose real failure run gets promoted into the case.
 # ---------------------------------------------------------------------------
 CASE_DEFS: list[dict[str, Any]] = [
     {
@@ -214,7 +214,7 @@ CASE_DEFS: list[dict[str, Any]] = [
     },
 ]
 
-# benign traffic templates for the 250-run history
+# boring traffic templates for the 250-run history
 _TRAFFIC_KINDS = (
     ("support", 0.30),
     ("password_reset", 0.16),
@@ -249,7 +249,7 @@ _TRAFFIC_TITLES = {
 
 
 def _expected_for(input: dict[str, Any]) -> dict[str, Any]:
-    """Ground truth = what the policy-correct triage produces for this input."""
+    """ground truth = what the policy-correct triage outputs for this input."""
     out = behavior_for_label("v_good")(input)
     return {
         "queue": out.queue,
@@ -293,7 +293,7 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
     say(f"versions: {', '.join(version_ids)}")
 
     # --- 2. production run history ------------------------------------------
-    # v1 serves days 0-5, v2 days 4-11, v_good days 10-18 (overlapping rollout)
+    # overlapping rollout: v1 days 0-5, v2 days 4-11, v_good days 10-18
     schedule = [
         ("v1", 0.0, 5.5, 50),
         ("v2", 4.0, 11.5, 85),
@@ -332,7 +332,7 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
             run_count += 1
     say(f"production runs: {run_count}")
 
-    # --- 3. the 12 failure runs -> frozen eval cases -------------------------
+    # --- 3. turn the 12 failure runs into frozen eval cases ------------------
     judge = MockJudge()
     gt_store: dict[str, Any] = {}
     case_ids: dict[str, str] = {}
@@ -353,7 +353,7 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
             "_constraints": constraints,
         }
         trace = run_agent(version, run_input, seed=SEED + i)
-        # failure runs happened while that version was live
+        # these failures happened back when that version was live
         fail_day = rng.uniform(1.0, 5.0) if fail_label == "v1" else rng.uniform(5.0, 10.0)
         run_id = capture_run(
             conn,
@@ -382,7 +382,7 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
         )
         assert case_id is not None
         case_ids[cdef["key"]] = case_id
-        # the case carries its own judged FAIL for the version it came from
+        # the case keeps its own judged fail for the version it came from
         from .judge import output_hash
 
         db.upsert_eval_result(
@@ -400,21 +400,21 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
     LocalJSONGroundTruth().write_store(gt_store)
 
     # --- 4. pre-warm cached verdicts for the demo versions -------------------
-    # chronological order so fixed_in_version_id lands on the true fixer
+    # go in chronological order so fixed_in_version_id lands on the real fixer
     for label in ("v2", "v_good", "v_regressed", "v_fixed"):
         version = db.get_version(conn, version_ids[label])
         assert version is not None
         for case in db.list_eval_cases(conn, status="active"):
-            # don't re-judge the recorded first-failure (keeps history honest)
+            # don't re-judge the recorded first failure (keeps history honest)
             if db.get_cached_result(conn, case["id"], version["id"]) is not None:
                 continue
-            # v2 history only exists for cases that had already been frozen
+            # v2 only has history for cases that were already frozen by then
             if label == "v2" and case["first_failed_version_id"] != version_ids["v1"]:
                 continue
             judge_case(conn, case, version, use_cache=False)
     say("cached verdicts pre-warmed for v2/v_good/v_regressed/v_fixed")
 
-    # --- 5. one historical PASS gate run so the dashboard opens green --------
+    # --- 5. one old pass gate run so the dashboard opens green ---------------
     db.insert_gate_run(
         conn,
         candidate_version_id=version_ids["v_good"],
@@ -428,7 +428,7 @@ def seed_all(conn: sqlite3.Connection, *, verbose: bool = False) -> dict[str, An
         created_at=_iso(now - timedelta(days=6)),
     )
 
-    # --- 6. optional voice pre-render (no-op without ELEVENLABS_API_KEY) -----
+    # --- 6. optional voice pre-render (no-op without elevenlabs key) ---------
     audio = prerender_verdicts()
 
     return {

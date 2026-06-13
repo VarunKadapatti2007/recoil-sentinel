@@ -1,7 +1,7 @@
-"""`recoil doctor` — trustworthy green/red readiness checklist.
+"""`recoil doctor` — honest green/red readiness checklist.
 
-The presenter runs this immediately before going on stage; every check is
-real (no decorative greens) and every external probe has a fast timeout.
+you run this right before going on stage. every check is real (no fake
+greens) and every external probe has a fast timeout.
 """
 
 from __future__ import annotations
@@ -32,11 +32,11 @@ def run_doctor() -> bool:
     def add(name: str, fn: Callable[[], tuple[bool, str]], *, optional: bool = False) -> None:
         try:
             ok, detail = fn()
-        except Exception as exc:  # a doctor check must never crash the doctor
+        except Exception as exc:  # a check should never take down the doctor itself
             ok, detail = False, f"check crashed: {exc}"
         checks.append((name, ok, optional, detail))
 
-    # --- core ---------------------------------------------------------------
+    # --- core checks --------------------------------------------------------
     add("python >= 3.11", lambda: (sys.version_info >= (3, 11), sys.version.split()[0]))
 
     def deps() -> tuple[bool, str]:
@@ -97,7 +97,7 @@ def run_doctor() -> bool:
         ),
     )
 
-    # --- providers (optional enrichment) -------------------------------------
+    # --- providers (optional, nice-to-have) ----------------------------------
     def anthropic_probe() -> tuple[bool, str]:
         if not config.ANTHROPIC_API_KEY:
             return False, "ANTHROPIC_API_KEY not set — judge degrades to deterministic mock"
@@ -140,7 +140,7 @@ def run_doctor() -> bool:
 
     add("dashboard prerequisites", web_check, optional=True)
 
-    # --- report ---------------------------------------------------------------
+    # --- print the report ----------------------------------------------------
     print()
     print(f"{BOLD}recoil doctor{RESET}")
     print("-" * 72)

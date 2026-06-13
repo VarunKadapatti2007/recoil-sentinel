@@ -100,7 +100,7 @@ function GateScreen() {
         void refresh();
         const audio = new Audio(voiceUrl(data.verdict));
         audio.play().catch(() => {
-          /* voice layer is optional — silence is fine */
+          /* voice is just for flair, silence is fine */
         });
       });
       es.addEventListener("error", (e) => {

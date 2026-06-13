@@ -1,5 +1,5 @@
-"""Thin SQLite data-access layer. Deliberately boring: stdlib sqlite3, explicit
-SQL, dict rows, no ORM. Reliability over cleverness on the demo path.
+"""thin sqlite data layer. boring on purpose: stdlib sqlite3, raw sql,
+dict rows, no orm. we want reliability over cleverness on the demo path.
 """
 
 from __future__ import annotations
@@ -98,8 +98,8 @@ def new_id() -> str:
 def connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
     path = Path(db_path or config.DB_PATH)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # check_same_thread=False: the SSE stream judges cases via asyncio.to_thread;
-    # access is strictly sequential per connection, never concurrent.
+    # check_same_thread=False because the sse stream judges via asyncio.to_thread;
+    # access stays strictly sequential per connection, never actually concurrent.
     conn = sqlite3.connect(path, timeout=10, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
@@ -113,7 +113,7 @@ def init_db(conn: sqlite3.Connection) -> None:
 
 
 def reset_db(db_path: Optional[Path] = None) -> sqlite3.Connection:
-    """Drop everything and recreate the schema. Used by `recoil reset --demo`."""
+    """nuke everything and rebuild the schema. used by `recoil reset --demo`."""
     conn = connect(db_path)
     conn.executescript(
         """

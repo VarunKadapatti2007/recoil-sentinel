@@ -1,15 +1,15 @@
-"""Sponsor integrations for the Sentinel pipeline. Every integration:
-- activates only when its credentials are configured,
-- runs the REAL service (no mocks),
-- degrades to a clear status string on failure — a sponsor outage must never
-  block the publish loop.
+"""sponsor integrations for the sentinel pipeline. each one:
+- only turns on when its credentials are set,
+- hits the real service (no mocks),
+- falls back to a clear status string on failure — a sponsor outage should
+  never block the publish loop.
 
-ClickHouse  : every sentinel run is mirrored to ClickHouse Cloud (HTTPS
-              interface, JSONEachRow) for real-time analytics.
-Composio    : on a successful publish the agent ACTS on the web — it opens a
-              real GitHub issue carrying the report summary + cited.md link.
-Airbyte     : ground-truth control plane — client-credentials auth, workspace
-              reachability, connection listing and (when present) sync trigger.
+clickhouse : every sentinel run is mirrored to clickhouse cloud (https,
+             jsoneachrow) for real-time analytics.
+composio   : on a successful publish the agent acts on the web — opens a real
+             github issue with the report summary + cited.md link.
+airbyte    : ground-truth control plane — client-credentials auth, workspace
+             reachability, connection listing, and (if present) sync trigger.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from .. import config
 log = logging.getLogger("recoil.sentinel")
 
 # ---------------------------------------------------------------------------
-# ClickHouse (Phase C)
+# clickhouse
 # ---------------------------------------------------------------------------
 
 _CH_TABLE_DDL = """
@@ -53,8 +53,8 @@ def _ch_query(sql: str, *, body: Optional[str] = None) -> str:
         params={"query": sql},
         content=body or b"",
         auth=(config.CLICKHOUSE_USER, config.CLICKHOUSE_PASSWORD),
-        # ClickHouse Cloud idles between runs; waking can exceed the default
-        # external timeout, so give this integration a longer leash.
+        # clickhouse cloud idles between runs; waking it can blow past the
+        # default timeout, so give this one a longer leash.
         timeout=max(config.EXTERNAL_TIMEOUT_S, 60.0),
     )
     resp.raise_for_status()
@@ -71,7 +71,7 @@ def clickhouse_record_run(
     llm_stats: dict[str, Any],
     title: str,
 ) -> str:
-    """Mirror one sentinel run into ClickHouse. Returns a status string."""
+    """mirror one sentinel run into clickhouse. returns a status string."""
     if not (config.CLICKHOUSE_HOST and config.CLICKHOUSE_PASSWORD):
         return "skipped (not configured)"
     try:
@@ -99,7 +99,7 @@ def clickhouse_record_run(
 
 
 def clickhouse_stats() -> Optional[dict[str, Any]]:
-    """Aggregate stats for the dashboard/status endpoint. None if unavailable."""
+    """aggregate stats for the dashboard/status endpoint. none if unavailable."""
     if not (config.CLICKHOUSE_HOST and config.CLICKHOUSE_PASSWORD):
         return None
     try:
@@ -114,7 +114,7 @@ def clickhouse_stats() -> Optional[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Composio (Phase D)
+# composio
 # ---------------------------------------------------------------------------
 
 def composio_publish_action(
@@ -125,12 +125,12 @@ def composio_publish_action(
     claims_ok: int,
     claims_total: int,
 ) -> str:
-    """The agent acts on the web: open a real GitHub issue announcing the report.
-    Returns a status string (issue URL on success)."""
+    """agent acts on the web: open a real github issue announcing the report.
+    returns a status string (issue url on success)."""
     if not config.COMPOSIO_API_KEY:
         return "skipped (not configured)"
     try:
-        from composio import Composio  # lazy: optional dependency
+        from composio import Composio  # lazy import, optional dep
 
         client = Composio(api_key=config.COMPOSIO_API_KEY)
         body = (
@@ -152,7 +152,7 @@ def composio_publish_action(
             },
             user_id=config.COMPOSIO_USER_ID,
             connected_account_id=config.COMPOSIO_CONNECTED_ACCOUNT_ID or None,
-            # one stable tool; schema drift is tolerated via graceful degradation
+            # one stable tool; we tolerate schema drift by degrading gracefully
             dangerously_skip_version_check=True,
         )
         data = result.get("data", {}) if isinstance(result, dict) else {}
@@ -166,20 +166,20 @@ def composio_publish_action(
 
 
 # ---------------------------------------------------------------------------
-# Senso / cited.md — publish the verified report to the agentic content layer
+# senso / cited.md — push the verified report to the agentic content layer
 # ---------------------------------------------------------------------------
 
 def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
-    """Publish a verified report to Senso (the platform behind cited.md) via the
-    real API (apiv2.senso.ai, POST /org/kb/raw). Only fires after the report has
-    PASSED claim verification — so Senso only ever receives machine-verified,
-    grounded content. Returns a status string with the Senso content id."""
+    """publish a verified report to senso (the platform behind cited.md) via the
+    real api (apiv2.senso.ai, POST /org/kb/raw). only fires after the report
+    passed verification, so senso only ever gets machine-verified, grounded
+    content. returns a status string with the senso content id."""
     if not config.SENSO_API_KEY:
         return "skipped (set SENSO_API_KEY to publish to cited.md)"
     headers = {"X-API-Key": config.SENSO_API_KEY, "Content-Type": "application/json"}
     try:
-        # Preferred path: publish a LIVE article on the public cited.md page via the
-        # content engine (needs a GEO question id + the Cited.md publisher id).
+        # preferred path: publish a live article on the public cited.md page via
+        # the content engine (needs a geo question id + the cited.md publisher id).
         if config.SENSO_GEO_QUESTION_ID and config.SENSO_PUBLISHER_ID:
             resp = httpx.post(
                 f"{config.SENSO_API_BASE}/org/content-engine/publish",
@@ -202,7 +202,7 @@ def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
                 return f"published to cited.md ({data.get('publish_status', 'queued')})"
             log.warning("senso engine publish %s: %s — falling back to KB", resp.status_code, resp.text[:160])
 
-        # Fallback: ingest into the org knowledge base (still real Senso usage).
+        # fallback: ingest into the org knowledge base (still real senso usage).
         resp = httpx.post(
             f"{config.SENSO_API_BASE}/org/kb/raw",
             headers=headers,
@@ -220,7 +220,7 @@ def senso_publish_citeable(*, title: str, summary: str, markdown: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Airbyte (Phase B)
+# airbyte
 # ---------------------------------------------------------------------------
 
 _AIRBYTE_API = "https://api.airbyte.com/v1"
@@ -239,9 +239,9 @@ def _airbyte_token(client: httpx.Client) -> str:
 
 
 def airbyte_ground_truth_check(*, trigger_sync: bool = False) -> str:
-    """Verify the Airbyte ground-truth control plane: authenticate with client
-    credentials, confirm workspace reachability, list connections, optionally
-    trigger a sync of the first one. Returns a status string."""
+    """check the airbyte ground-truth control plane: auth with client creds,
+    confirm the workspace is reachable, list connections, and optionally trigger
+    a sync of the first one. returns a status string."""
     if not (config.AIRBYTE_CLIENT_ID and config.AIRBYTE_CLIENT_SECRET):
         return "skipped (not configured)"
     try:

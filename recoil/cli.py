@@ -1,8 +1,8 @@
-"""The `recoil` CLI: gate / publish / run / reset / demo-check / seed /
+"""the `recoil` cli: gate / publish / run / reset / demo-check / seed /
 install-hook / doctor / serve.
 
-Exit codes are the product: `recoil gate` exits 1 on BLOCK and 0 on PASS,
-exactly like a failing CI check.
+the exit codes are the whole point: `recoil gate` exits 1 on block, 0 on
+pass, just like a failing ci check.
 """
 
 from __future__ import annotations
@@ -85,7 +85,7 @@ def gate(
     live: bool = typer.Option(False, "--live", help="Force live judging (ignore cache)"),
     voice: bool = typer.Option(False, "--voice", help="Play the spoken verdict if available"),
 ) -> None:
-    """Run the regression gate. Exits 1 on BLOCK, 0 on PASS."""
+    """run the regression gate. exits 1 on block, 0 on pass."""
     conn = _conn()
     try:
         report = run_gate(
@@ -112,7 +112,7 @@ def publish(
     candidate: str = typer.Option(..., "--candidate", "-c", help="Candidate version label or id"),
     baseline: Optional[str] = typer.Option(None, "--baseline", "-b"),
 ) -> None:
-    """Run the gate; only flip is_published if the verdict is PASS."""
+    """run the gate; only flip is_published if the verdict is pass."""
     conn = _conn()
     try:
         report = run_gate(conn, candidate=candidate, baseline=baseline)
@@ -143,7 +143,7 @@ def run(
     ),
     live: bool = typer.Option(False, "--live", help="Call the live model if configured"),
 ) -> None:
-    """Invoke the agent once: capture trace -> judge -> promote to eval case on FAIL."""
+    """run the agent once: capture trace -> judge -> promote to an eval case on fail."""
     conn = _conn()
     v = db.resolve_version(conn, version)
     if v is None:
@@ -192,7 +192,7 @@ def run(
 def reset(
     demo: bool = typer.Option(False, "--demo", help="Restore the pristine seeded demo state"),
 ) -> None:
-    """Reset the database. With --demo, re-seed the full demo state (<2s, idempotent)."""
+    """reset the db. with --demo, re-seed the full demo state (<2s, idempotent)."""
     if not demo:
         typer.secho("refusing to wipe without --demo (the only supported reset)", err=True)
         raise typer.Exit(code=2)
@@ -213,7 +213,7 @@ def reset(
 
 @app.command()
 def seed(verbose: bool = typer.Option(True, "--verbose/--quiet")) -> None:
-    """Seed the database (same as reset --demo, kept as a familiar alias)."""
+    """seed the db (same as reset --demo, kept around as a familiar alias)."""
     config.ensure_dirs()
     conn = db.reset_db()
     from .seeding import seed_all
@@ -224,9 +224,9 @@ def seed(verbose: bool = typer.Option(True, "--verbose/--quiet")) -> None:
 
 @app.command(name="demo-check")
 def demo_check() -> None:
-    """Headless end-to-end assertion of the scripted demo path:
-    reset -> gate v_regressed (must BLOCK, hero case regressed) ->
-    gate v_fixed (must PASS). Exits non-zero with a clear message on any failure."""
+    """headless end-to-end check of the scripted demo path:
+    reset -> gate v_regressed (must block, hero case regressed) ->
+    gate v_fixed (must pass). exits non-zero with a clear message on any failure."""
     failures: list[str] = []
 
     def check(name: str, ok: bool, detail: str = "") -> None:
@@ -296,7 +296,7 @@ def demo_check() -> None:
 
 @app.command(name="install-hook")
 def install_hook() -> None:
-    """Install a git pre-push hook that runs `recoil gate` against the published baseline."""
+    """install a git pre-push hook that runs `recoil gate` against the published baseline."""
     git_dir = Path(".git")
     if not git_dir.is_dir():
         typer.secho("not a git repository (run from the repo root)", fg=typer.colors.RED, err=True)
@@ -324,7 +324,7 @@ def install_hook() -> None:
 
 @app.command()
 def doctor() -> None:
-    """Print the green/red readiness checklist. Run this before going on stage."""
+    """print the green/red readiness checklist. run this before going on stage."""
     from .doctor import run_doctor
 
     ready = run_doctor()
@@ -353,10 +353,10 @@ def sentinel(
         help="DEMO: inject a false claim to show the verifier catch it and refuse to publish",
     ),
 ) -> None:
-    """Run the autonomous intel agent: replay frozen failures (regression gate) ->
+    """run the autonomous intel agent: replay frozen failures (regression gate) ->
     fetch live ground truth -> generate a cited report (live model) -> verify every
-    claim -> publish cited.md on PASS. Exits 1 (BLOCK) on regression or failed
-    verification; cited.md stays untouched. --watch N makes it fully autonomous."""
+    claim -> publish cited.md on pass. exits 1 (block) on a regression or failed
+    verification; cited.md stays untouched. --watch N runs it forever on its own."""
     import time as _time
 
     if watch is not None:
@@ -372,7 +372,7 @@ def sentinel(
 def _sentinel_once(
     *, out: Optional[str], skip_gate: bool, focus: Optional[str] = None, tamper: bool = False
 ) -> int:
-    """One sentinel cycle. Returns the exit code (0 PASS, 1 BLOCK, 2 error)."""
+    """one sentinel cycle. returns the exit code (0 pass, 1 block, 2 error)."""
     import time as _time
     from pathlib import Path as _Path
 
@@ -522,10 +522,10 @@ def verify_wallet(
         False, "--tamper", help="DEMO: inject a false on-chain claim to show the gate catch it"
     ),
 ) -> None:
-    """Verify a wallet's on-chain integrity: fetch live chain state -> agent makes
-    structured claims -> verify EVERY claim against the blockchain -> publish on
-    PASS. Exits 1 (BLOCK) if any claim does not match the chain. Same engine as
-    `recoil sentinel`, with the blockchain as ground truth."""
+    """check a wallet's on-chain integrity: fetch live chain state -> agent makes
+    structured claims -> verify every claim against the chain -> publish on pass.
+    exits 1 (block) if any claim doesn't match the chain. same engine as
+    `recoil sentinel`, just with the blockchain as ground truth."""
     import time as _time
     from pathlib import Path as _Path
 
@@ -612,7 +612,7 @@ def verify_wallet(
 def serve(
     port: int = typer.Option(config.API_PORT, "--port", help="API port (pinned default 8787)"),
 ) -> None:
-    """Start the Recoil API server (FastAPI + SSE) on the pinned port."""
+    """start the recoil api server (fastapi + sse) on the pinned port."""
     import errno
 
     import uvicorn
@@ -631,7 +631,7 @@ def serve(
         raise
 
 
-def main() -> None:  # console_scripts entry
+def main() -> None:  # console_scripts entry point
     app()
 
 

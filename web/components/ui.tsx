@@ -4,9 +4,7 @@ import { clsx } from "clsx";
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import type { Severity, Verdict } from "@/lib/types";
 
-/* ----------------------------------------------------------------------------
-   Minimal shadcn-style primitives bound to the Recoil token set.
----------------------------------------------------------------------------- */
+/* tiny shadcn-ish ui bits wired to recoil's design tokens */
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (

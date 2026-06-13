@@ -1,14 +1,13 @@
-"""On-chain ground truth — wallet & transaction integrity verification.
+"""on-chain ground truth — wallet & transaction integrity checks.
 
-This is the "plug and play" thesis made concrete: the SAME engine as the market
-Sentinel (generate -> verify -> gate -> freeze), with the ground-truth source
-swapped to the BLOCKCHAIN ITSELF via keyless JSON-RPC. The agent makes
-structured claims about a wallet's on-chain state; every numeric claim is
-checked against the chain before anything is published or acted on. A
-hallucinated balance, a wrong amount, or a falsified transaction is BLOCKED —
-because in crypto a wrong number is irreversible lost money.
+same engine as the market sentinel (generate -> verify -> gate -> freeze), just
+with the ground-truth source swapped to the blockchain itself over keyless
+json-rpc. the agent makes structured claims about a wallet's on-chain state and
+every number gets checked against the chain before we publish or act. a
+hallucinated balance, wrong amount, or fake transaction gets blocked — in crypto
+a wrong number is irreversible lost money.
 
-Verified against live Base Sepolia RPC at build time (2026-06-12).
+checked against live base sepolia rpc at build time (2026-06-12).
 """
 
 from __future__ import annotations
@@ -27,7 +26,7 @@ RPC_URLS = {
     "base-sepolia": "https://sepolia.base.org",
     "base": "https://mainnet.base.org",
 }
-# canonical USDC contracts (the token x402 settles in)
+# canonical usdc contracts (the token x402 settles in)
 USDC_CONTRACTS = {
     "base-sepolia": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     "base": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -55,10 +54,10 @@ def _rpc(client: httpx.Client, url: str, method: str, params: list[Any]) -> Any:
 def fetch_wallet_snapshot(
     address: Optional[str] = None, network: Optional[str] = None
 ) -> dict[str, Any]:
-    """Pull a wallet's live on-chain state. Returns the standard snapshot shape
-    (so it flows through the existing generate/verify/gate engine unchanged):
-    {fetched_at, metrics, source_errors, subject}. Raises ChainError on failure
-    — the agent must never reason about a wallet it couldn't actually read."""
+    """grab a wallet's live on-chain state. returns the standard snapshot shape
+    so it flows through the existing generate/verify/gate engine as-is:
+    {fetched_at, metrics, source_errors, subject}. raises ChainError on failure —
+    the agent should never reason about a wallet it couldn't actually read."""
     address = (address or config.X402_WALLET_ADDRESS or "").strip()
     network = (network or config.X402_NETWORK or "base-sepolia").strip()
     if not address:
@@ -128,9 +127,9 @@ def fetch_wallet_snapshot(
 
 
 def fetch_transaction_snapshot(tx_hash: str, network: Optional[str] = None) -> dict[str, Any]:
-    """Pull a single transaction's on-chain facts for integrity verification —
-    sender, recipient, and value as recorded on-chain. Raises ChainError if the
-    tx does not exist (a hallucinated tx hash is itself a caught failure)."""
+    """grab one transaction's on-chain facts to verify integrity — sender,
+    recipient, and value as recorded on-chain. raises ChainError if the tx
+    doesn't exist (a made-up tx hash is itself a caught failure)."""
     network = (network or config.X402_NETWORK or "base-sepolia").strip()
     url = RPC_URLS.get(network)
     if not url:

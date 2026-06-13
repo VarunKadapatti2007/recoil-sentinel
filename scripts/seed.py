@@ -1,4 +1,4 @@
-"""Seed entrypoint (thin wrapper over recoil.seeding) — `python scripts/seed.py`."""
+"""thin wrapper to seed the db — just run `python scripts/seed.py`."""
 
 from __future__ import annotations
 

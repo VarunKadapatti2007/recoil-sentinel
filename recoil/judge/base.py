@@ -1,4 +1,4 @@
-"""Provider-agnostic judge interface."""
+"""the judge interface, works with any provider."""
 
 from __future__ import annotations
 
@@ -22,9 +22,8 @@ Rules:
 
 
 class Judge(ABC):
-    """Judge.evaluate(...) -> JudgeVerdict. Implementations must never raise on
-    the demo path: on any provider failure they return a conservative
-    passed=False verdict whose rationale names the judge error."""
+    """evaluate(...) gives back a JudgeVerdict. never raise on the demo path —
+    if the provider blows up, return a safe passed=False verdict and say why."""
 
     name: str = "judge"
 

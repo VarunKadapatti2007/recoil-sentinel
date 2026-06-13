@@ -1,11 +1,11 @@
-"""Live, keyless ground-truth sources for the Sentinel agent.
+"""live, keyless ground-truth sources for the sentinel agent.
 
-Response shapes verified against the live APIs at build time (2026-06-12):
-- CoinGecko /simple/price -> {coin: {usd, usd_market_cap, usd_24h_change}}
-- DefiLlama /protocols    -> [{name, slug, tvl, change_1d, change_7d, category, url, chain}]
-- DefiLlama /v2/chains    -> [{name, tvl}]
+response shapes checked against the live apis at build time (2026-06-12):
+- coingecko /simple/price -> {coin: {usd, usd_market_cap, usd_24h_change}}
+- defillama /protocols    -> [{name, slug, tvl, change_1d, change_7d, category, url, chain}]
+- defillama /v2/chains    -> [{name, tvl}]
 
-Every metric carries its own source URL and fetch timestamp — these become the
+every metric keeps its own source url and fetch time — those become the
 citations in cited.md and the ground truth the verifier/judge grades against.
 """
 
@@ -30,7 +30,7 @@ COINGECKO_URL = (
 LLAMA_PROTOCOLS_URL = "https://api.llama.fi/protocols"
 LLAMA_CHAINS_URL = "https://api.llama.fi/v2/chains"
 
-# DefiLlama's TVL leaderboard is dominated by exchange custody; real DeFi only.
+# defillama's tvl leaderboard is mostly exchange custody; we want real defi only.
 _EXCLUDED_CATEGORIES = {"CEX", "Chain", "Bridge", "RWA"}
 
 
@@ -53,9 +53,9 @@ def _get_json(client: httpx.Client, url: str) -> Any:
 
 
 def fetch_snapshot(*, top_n_protocols: int = 8, top_n_chains: int = 6) -> dict[str, Any]:
-    """Pull a live market snapshot. Returns:
+    """grab a live market snapshot. returns:
     {fetched_at, metrics: {key: {label, value, unit, source, source_url, extra}}}
-    Raises SourceError if no source is reachable (the agent must not run blind).
+    raises SourceError if nothing is reachable — the agent shouldn't run blind.
     """
     fetched_at = datetime.now(timezone.utc).isoformat()
     metrics: dict[str, dict[str, Any]] = {}

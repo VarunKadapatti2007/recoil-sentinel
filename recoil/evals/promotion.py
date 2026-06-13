@@ -1,9 +1,9 @@
-"""Failure -> frozen eval case promotion: the self-growing suite.
+"""turns failures into frozen eval cases — the suite grows itself.
 
-When a run is judged FAIL it is frozen into a permanent, versioned regression
-case: input + ground-truth context snapshot + the judge's articulated
-reference behavior, with first_failed_version_id recorded. When a later
-version passes the case, fixed_in_version_id is stamped (see runner.py).
+when a run fails, we freeze it into a permanent regression case: input +
+ground-truth snapshot + the judge's reference behavior, tagged with
+first_failed_version_id. when a later version passes it, fixed_in_version_id
+gets stamped (see runner.py).
 """
 
 from __future__ import annotations
@@ -32,13 +32,13 @@ def promote_failure_to_case(
     severity: str = "medium",
     rubric: Optional[str] = None,
 ) -> Optional[str]:
-    """Freeze a failed run into an eval case. Returns the new case id,
-    or None if the run already has a case with identical input."""
+    """freeze a failed run into an eval case. returns the new case id, or None
+    if a case with the same input already exists."""
     run = db.get_run(conn, run_id)
     if run is None:
         raise ValueError(f"run {run_id} not found")
 
-    # idempotence: identical input already frozen -> skip
+    # idempotent: if the same input is already frozen, skip
     import json
 
     input_json = json.dumps(run["input"], sort_keys=True)

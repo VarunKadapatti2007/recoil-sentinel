@@ -1,17 +1,15 @@
-"""LLM-backed judge providers: Anthropic direct, AWS Bedrock, OpenAI.
+"""llm-backed judges: anthropic direct, aws bedrock, openai.
 
-Every provider:
-- requests structured JSON validated against JudgeVerdict (bounded retries),
-- is wrapped with timeouts and bounded SDK retries,
-- never raises: on failure returns a conservative passed=False verdict whose
-  rationale names the judge error, and logs loudly.
+every provider:
+- asks for structured json validated against JudgeVerdict (with retries),
+- has timeouts and bounded sdk retries,
+- never raises: on failure returns a safe passed=False verdict that names the
+  error and logs loudly.
 
-Model notes (verified against current Anthropic docs at build time):
-- Anthropic direct default: `claude-opus-4-8`. On Opus 4.7+ / Fable the
-  `temperature` parameter is rejected by the API, so we only send
-  temperature=0 on models that still accept it.
-- Bedrock model IDs carry the `anthropic.` prefix, e.g.
-  `anthropic.claude-opus-4-8`.
+model notes:
+- anthropic default is `claude-opus-4-8`. opus 4.7+ / fable reject the
+  `temperature` param, so we only send temperature=0 to models that take it.
+- bedrock model ids have the `anthropic.` prefix, e.g. `anthropic.claude-opus-4-8`.
 """
 
 from __future__ import annotations
@@ -78,7 +76,7 @@ def _coerce_verdict(raw: str) -> JudgeVerdict:
 
 
 def _model_accepts_temperature(model: str) -> bool:
-    """temperature is removed on Opus 4.7+, Opus 4.8 and Fable 5 (400 if sent)."""
+    """opus 4.7+, opus 4.8 and fable 5 dropped temperature (400 if you send it)."""
     m = model.lower()
     blocked = ("claude-opus-4-7", "claude-opus-4-8", "claude-fable", "claude-mythos")
     return not any(b in m for b in blocked)
@@ -114,7 +112,7 @@ class AnthropicJudge(Judge):
             if _model_accepts_temperature(self.model):
                 kwargs["temperature"] = 0
             last_exc: Optional[Exception] = None
-            for _attempt in range(2):  # bounded retry on malformed output
+            for _attempt in range(2):  # retry once if output is malformed
                 response = client.messages.create(
                     model=self.model,
                     max_tokens=2048,
@@ -135,7 +133,7 @@ class AnthropicJudge(Judge):
                 text = next((b.text for b in response.content if b.type == "text"), "")
                 try:
                     return _coerce_verdict(text)
-                except Exception as exc:  # malformed JSON — retry once
+                except Exception as exc:  # bad json — try again
                     last_exc = exc
             return _error_verdict(self.name, last_exc or RuntimeError("malformed judge output"))
         except Exception as exc:
@@ -143,9 +141,9 @@ class AnthropicJudge(Judge):
 
 
 class BedrockJudge(AnthropicJudge):
-    """AWS Bedrock provider. Same request shape as Anthropic direct; model IDs
-    carry the `anthropic.` prefix. Falls back (via factory) to Anthropic direct
-    or mock when Bedrock access isn't configured."""
+    """aws bedrock provider. same request shape as anthropic direct, just with
+    `anthropic.`-prefixed model ids. the factory falls back to anthropic direct
+    or mock if bedrock isn't set up."""
 
     name = "bedrock"
 

@@ -1,9 +1,9 @@
-"""Publisher: render the verified report to cited.md (+ JSON sidecar) and
-capture the whole run as a Recoil trace.
+"""publisher: render the verified report to cited.md (+ json sidecar) and
+capture the whole run as a recoil trace.
 
-Gate semantics (the Recoil DNA): publication is REFUSED unless every claim
-verified against the live ground-truth snapshot. A blocked report is still
-recorded — failures are data — but cited.md is never updated with one.
+gate rule (the recoil dna): we refuse to publish unless every claim verified
+against the live snapshot. a blocked report still gets recorded — failures are
+data — but cited.md never gets written with one.
 """
 
 from __future__ import annotations
@@ -21,8 +21,8 @@ from .agent import IntelReport, VerificationResult
 
 import os
 
-# overridable so a deployed cron (writing to a shared disk) and the API server
-# agree on one location; default is the repo root for local dev.
+# overridable so a deployed cron (writing to shared disk) and the api server
+# agree on one path; defaults to repo root for local dev.
 CITED_MD_PATH = Path(os.environ.get("RECOIL_CITED_PATH", config.REPO_ROOT / "cited.md"))
 
 SENTINEL_VERSION_LABEL = "sentinel_v1"
@@ -57,10 +57,10 @@ def render_cited_md(
     *,
     run_id: str,
 ) -> str:
-    """Render the report with deterministic, resolvable citations."""
+    """render the report with deterministic, resolvable citations."""
     metrics = snapshot["metrics"]
 
-    # stable citation numbering over every metric actually used, in order of appearance
+    # number citations by first appearance over every metric actually used
     cited_keys: list[str] = []
     for f in report.findings:
         for k in f.metric_keys:
@@ -131,8 +131,8 @@ def publish_report(
     fetch_ms: float,
     out_path: Optional[Path] = None,
 ) -> dict[str, Any]:
-    """Capture the trace; write cited.md ONLY if verification passed.
-    Returns {run_id, published, path, verdict}."""
+    """capture the trace; only write cited.md if verification passed.
+    returns {run_id, published, path, verdict}."""
     version = _ensure_sentinel_version(conn)
 
     t = 0.0

@@ -1,12 +1,12 @@
-"""Optional spoken verdicts via ElevenLabs, with pre-rendered MP3 fallback.
+"""optional spoken verdicts via elevenlabs, with a pre-rendered mp3 fallback.
 
-The demo never waits on this layer:
-- Verdict MP3s are pre-rendered during seeding when ELEVENLABS_API_KEY is set.
-- At gate time, the cached file is served; live generation only happens if a
-  cached file is missing AND a key is present, bounded by a short timeout.
-- With no key and no cached audio, the layer silently no-ops.
+the demo never waits on this layer:
+- verdict mp3s are pre-rendered during seeding when ELEVENLABS_API_KEY is set.
+- at gate time we serve the cached file; live generation only happens if the
+  cached file is missing and a key is present, capped by a short timeout.
+- with no key and no cached audio, this layer just no-ops.
 
-API shape (current ElevenLabs REST):
+api shape (current elevenlabs rest):
 POST https://api.elevenlabs.io/v1/text-to-speech/{voice_id}
 headers: xi-api-key; body: {"text": ..., "model_id": "eleven_turbo_v2_5"}
 """
@@ -35,7 +35,7 @@ def verdict_audio_path(verdict: str) -> Path:
 
 
 def _generate_mp3(text: str, out_path: Path, *, timeout: Optional[float] = None) -> bool:
-    """Call ElevenLabs TTS. Returns True on success; never raises."""
+    """call elevenlabs tts. returns true on success; never raises."""
     if not config.ELEVENLABS_API_KEY:
         return False
     try:
@@ -57,7 +57,7 @@ def _generate_mp3(text: str, out_path: Path, *, timeout: Optional[float] = None)
 
 
 def prerender_verdicts() -> dict[str, bool]:
-    """Pre-render both verdict lines to MP3 (seeding step). No-op without a key."""
+    """pre-render both verdict lines to mp3 (seeding step). no-op without a key."""
     results = {}
     for verdict, line in VERDICT_LINES.items():
         path = verdict_audio_path(verdict)
@@ -69,8 +69,8 @@ def prerender_verdicts() -> dict[str, bool]:
 
 
 def speak_verdict(verdict: str) -> Optional[Path]:
-    """Return the path of the verdict MP3 to play, or None if voice is unavailable.
-    Prefers the pre-rendered cache; tries one fast live generation otherwise."""
+    """return the path of the verdict mp3 to play, or none if voice is unavailable.
+    prefers the cached file; otherwise tries one fast live generation."""
     verdict = verdict.upper()
     if verdict not in VERDICT_LINES:
         return None

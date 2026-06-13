@@ -1,8 +1,8 @@
-"""Judge selection + verdict cache keying.
+"""picks a judge + builds the verdict cache key.
 
-Provider chosen by RECOIL_JUDGE_PROVIDER. Anything unconfigured (missing key,
-missing SDK) degrades to the deterministic grounded mock judge with a loud log
-— an optional service must never block the build or the demo.
+provider comes from RECOIL_JUDGE_PROVIDER. anything not set up (no key, no sdk)
+falls back to the deterministic mock judge with a loud log — judging is
+optional and shouldn't ever block the build or demo.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def _warn_once(message: str) -> None:
 
 
 def output_hash(output: dict) -> str:
-    """Stable hash of an agent output — the cache key component."""
+    """stable hash of an agent output — part of the cache key."""
     return hashlib.sha256(
         json.dumps(output, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
@@ -55,7 +55,7 @@ def get_judge(provider: str | None = None) -> Judge:
         try:
             from .llm_judges import BedrockJudge
 
-            import anthropic  # noqa: F401 — verify SDK present
+            import anthropic  # noqa: F401 — just checking the sdk is here
 
             return BedrockJudge()
         except ImportError:

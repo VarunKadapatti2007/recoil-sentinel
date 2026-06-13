@@ -20,7 +20,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
       const body = await res.json();
       detail = body.detail ?? detail;
     } catch {
-      /* keep statusText */
+      /* no json body, just keep the statustext */
     }
     throw new ApiError(res.status, detail);
   }

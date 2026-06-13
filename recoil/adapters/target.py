@@ -1,10 +1,10 @@
-"""Publish-target adapter.
+"""publish-target adapter.
 
-Recoil is framework-agnostic: the default target is Recoil's own version store
-(`recoil publish` flips is_published after a PASS gate). A Guild.ai target is
-interface-ready behind the same contract; it is intentionally not wired to an
-unverified SDK/CLI — selecting it without configuration produces a clear error
-instead of a hardcoded guess.
+recoil is framework-agnostic: the default target is recoil's own version store
+(`recoil publish` flips is_published after a passing gate). a guild.ai target is
+interface-ready behind the same contract, but it's not wired to an unverified
+sdk/cli on purpose — selecting it without config gives a clear error instead of
+a hardcoded guess.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ class PublishTarget(ABC):
 
     @abstractmethod
     def publish(self, conn: sqlite3.Connection, version_id: str) -> str:
-        """Mark the version live. Returns a human-readable confirmation."""
+        """mark the version live. returns a human-readable confirmation."""
 
 
 class LocalPublishTarget(PublishTarget):

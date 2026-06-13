@@ -1,19 +1,19 @@
-"""Phase F — the Recoil regression gate over real Sentinel reports.
+"""the recoil regression gate over real sentinel reports.
 
-Recoil DNA applied to the autonomous publisher:
+recoil dna applied to the autonomous publisher:
 
-- freeze_failure(): when a report fails claim verification, the exact failure
-  is frozen as a permanent eval case — input snapshot, failing report, and the
-  verifier's problems — with first_failed_version_id = sentinel_v1.
-- replay_frozen_cases(): before any future publish, the agent is re-run
-  against the FROZEN snapshots of past failures (ground truth pinned at
-  capture time, so replays are deterministic on the data side) and re-verified.
-  * a case that was previously fixed and fails again  -> REGRESSION -> BLOCK
-  * a case that has never passed and still fails      -> reported, not blocking
-  * a failing case that now passes                    -> stamped fixed_in
+- freeze_failure(): when a report fails verification, freeze the exact failure
+  as a permanent eval case — input snapshot, failing report, and the verifier's
+  problems — with first_failed_version_id = sentinel_v1.
+- replay_frozen_cases(): before any future publish, re-run the agent against the
+  frozen snapshots of past failures (ground truth pinned at capture time, so
+  replays are deterministic on the data side) and re-verify.
+  * was fixed before and fails again  -> regression -> block
+  * never passed and still fails       -> reported, not blocking
+  * was failing and now passes         -> stamped fixed_in
 
-This gives Sentinel the original product guarantee: it cannot republish a
-mistake it has already learned from.
+so sentinel keeps the original guarantee: it can't republish a mistake it's
+already learned from.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ log = logging.getLogger("recoil.sentinel")
 
 SENTINEL_CASE_KIND = "sentinel_replay"
 
-# replay cost control: each replayed case is one live model call
+# keep replay cost down: each replayed case is one live model call
 DEFAULT_REPLAY_LIMIT = 3
 
 
@@ -43,7 +43,7 @@ def freeze_failure(
     snapshot: dict[str, Any],
     verification: VerificationResult,
 ) -> str:
-    """Freeze a failed report into a permanent regression case."""
+    """freeze a failed report into a permanent regression case."""
     version = _ensure_sentinel_version(conn)
     title = f"Report must verify: {verification.problems[0][:70]}" if verification.problems else (
         "Report failed claim verification"
@@ -105,11 +105,11 @@ def replay_frozen_cases(
     limit: int = DEFAULT_REPLAY_LIMIT,
     generate: Optional[GenerateFn] = None,
 ) -> dict[str, Any]:
-    """Replay up to `limit` most-recent frozen sentinel cases against the
-    current agent. Returns:
+    """replay up to `limit` most-recent frozen sentinel cases against the current
+    agent. returns:
       {checked, regressions: [case], still_failing: [case], newly_fixed: [case],
        verdict: "PASS"|"BLOCK"}
-    BLOCK iff a previously-fixed case fails again. `generate` is injectable
+    blocks only if a previously-fixed case fails again. `generate` is injectable
     for tests; defaults to the live agent.
     """
     generate = generate or generate_report
@@ -134,7 +134,7 @@ def replay_frozen_cases(
                 else "; ".join(verification.problems)
             )
             actual = report.model_dump()
-        except Exception as exc:  # a broken agent must read as FAIL, not crash the gate
+        except Exception as exc:  # a broken agent should read as fail, not crash the gate
             passed = False
             rationale = f"[replay error] agent failed on frozen snapshot: {exc}"
             actual = {}

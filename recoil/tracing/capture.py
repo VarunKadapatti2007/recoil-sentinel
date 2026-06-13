@@ -1,4 +1,4 @@
-"""Trace capture: persist an agent execution as an OpenTelemetry-style run row."""
+"""trace capture: save an agent run as an opentelemetry-style run row."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def capture_run(
     trace: dict[str, Any],
     created_at: Optional[str] = None,
 ) -> str:
-    """Persist the result of agent.run_agent() as a runs row. Returns run id."""
+    """save the result of agent.run_agent() as a runs row. returns the run id."""
     return db.insert_run(
         conn,
         agent_version_id=agent_version_id,

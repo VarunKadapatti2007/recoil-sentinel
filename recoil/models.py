@@ -1,4 +1,4 @@
-"""Pydantic data contracts mirroring the SQLite schema (see recoil/db.py)."""
+"""pydantic data contracts that mirror the sqlite schema (see recoil/db.py)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ Priority = Literal["P1", "P2", "P3", "P4"]
 
 
 class TriageOutput(BaseModel):
-    """Structured output contract of the demo agent under test."""
+    """what the demo agent under test is supposed to spit out."""
 
     queue: str
     priority: Priority
@@ -99,7 +99,7 @@ class GateRun(BaseModel):
 
 
 class JudgeVerdict(BaseModel):
-    """What the judge returns for a single (input, output) pair."""
+    """what the judge hands back for one (input, output) pair."""
 
     passed: bool
     score: float = Field(ge=0.0, le=1.0)
@@ -108,7 +108,7 @@ class JudgeVerdict(BaseModel):
 
 
 class CaseClassification(BaseModel):
-    """Per-case gate classification (baseline vs candidate)."""
+    """how one case landed in the gate (baseline vs candidate)."""
 
     eval_case_id: str
     title: str

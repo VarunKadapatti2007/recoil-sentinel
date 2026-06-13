@@ -1,13 +1,12 @@
-"""The Sentinel intel agent: a REAL Anthropic agent that analyzes a live
-market snapshot and produces a structured, citable report — plus the
-deterministic verifier that grades every numeric claim against the snapshot
-(the ground truth) before anything is allowed to publish.
+"""sentinel intel agent: real anthropic agent reads a live market snapshot and
+writes a structured citable report, plus the verifier that checks every number
+against the snapshot before we let anything publish.
 
-Anti-hallucination design:
-- The model sees ONLY the snapshot metrics and may only reference their keys.
-- Every finding must list the metric keys it relies on and echo the exact
-  values it used; the verifier rejects unknown keys and out-of-tolerance values.
-- Citations are attached deterministically from the snapshot, never invented.
+anti-hallucination bits:
+- model only sees snapshot metrics and can only reference their keys.
+- each finding must list the keys it used and echo the exact values; verifier
+  rejects unknown keys and values outside tolerance.
+- citations come straight from the snapshot, never made up.
 """
 
 from __future__ import annotations
@@ -72,10 +71,9 @@ class SentinelError(Exception):
 def generate_report(
     snapshot: dict[str, Any], focus: Optional[str] = None
 ) -> tuple[IntelReport, dict[str, Any]]:
-    """Live model call. Returns (report, llm_stats). Raises SentinelError on failure —
-    Phase A is the real path; there is deliberately NO mock fallback here.
-    `focus` (optional) steers the analysis to a slice of the snapshot, e.g.
-    'the Solana ecosystem' or 'stablecoin TVL'."""
+    """live model call. returns (report, llm_stats), raises SentinelError if it
+    fails — this is the real path, no mock fallback on purpose. `focus` is
+    optional and narrows the analysis, e.g. 'the Solana ecosystem' or 'stablecoin TVL'."""
     if not config.ANTHROPIC_API_KEY:
         raise SentinelError("ANTHROPIC_API_KEY required: Sentinel runs on the live model only")
     try:
@@ -126,7 +124,7 @@ def generate_report(
     if report is None:
         raise SentinelError("model returned unparseable report")
     usage = response.usage
-    # claude-sonnet-4-6 pricing: $3/M input, $15/M output
+    # claude-sonnet-4-6 pricing: $3/m in, $15/m out
     cost = usage.input_tokens * 3e-6 + usage.output_tokens * 15e-6
     return report, {
         "model": config.AGENT_MODEL,
@@ -137,12 +135,12 @@ def generate_report(
     }
 
 
-# relative tolerance for echoed values (allows benign float/rounding drift)
+# how much echoed values can drift (lets benign float/rounding slop through)
 _TOLERANCE = 0.01
 
 
 def verify_report(report: IntelReport, snapshot: dict[str, Any]) -> VerificationResult:
-    """Grade every numeric claim against the ground-truth snapshot. Deterministic."""
+    """check every number in the report against the snapshot. deterministic."""
     metrics = snapshot["metrics"]
     checks: list[ClaimCheck] = []
     problems: list[str] = []
@@ -165,7 +163,7 @@ def verify_report(report: IntelReport, snapshot: dict[str, Any]) -> Verification
             observed = float(metrics[key]["value"])
             claimed = finding.claimed_values.get(key)
             if claimed is None:
-                # cited but no numeric claim echoed — allowed (qualitative reference)
+                # cited but no number echoed — that's fine, it's just a qualitative ref
                 checks.append(
                     ClaimCheck(finding_index=i, metric_key=key, claimed=None, observed=observed, ok=True)
                 )
@@ -203,13 +201,13 @@ def verify_report(report: IntelReport, snapshot: dict[str, Any]) -> Verification
 
 
 def tamper_report(report: IntelReport, snapshot: dict[str, Any]) -> tuple[IntelReport, str]:
-    """FAULT INJECTION (demo only): plant a false numeric claim against a real
-    ground-truth metric so verification is GUARANTEED to fail — like chaos
-    engineering for the truth layer. Lets you SHOW the gate catch a wrong number
-    and refuse to publish, live. Returns the corrupted report + a description."""
+    """demo-only fault injection: plant a bogus number against a real metric so
+    verification is guaranteed to fail — chaos engineering for the truth layer.
+    lets you show the gate catch a wrong number and refuse to publish live.
+    returns the corrupted report + a description."""
     key = next(iter(snapshot["metrics"]))
     observed = float(snapshot["metrics"][key]["value"])
-    corrupted = observed * 10 + 1  # guaranteed outside the 1% tolerance
+    corrupted = observed * 10 + 1  # way outside the 1% tolerance
     f0 = report.findings[0]
     new_keys = list(dict.fromkeys([*f0.metric_keys, key]))
     new_claims = {**f0.claimed_values, key: corrupted}

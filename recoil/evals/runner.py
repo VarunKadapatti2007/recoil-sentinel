@@ -1,11 +1,11 @@
-"""Suite runner: execute + judge a candidate version against eval cases.
+"""suite runner: run + judge a candidate version against the eval cases.
 
-Caching contract (the demo-determinism mechanism):
-- Every verdict is cached in eval_results keyed (eval_case_id,
+how caching works (this is what makes the demo deterministic):
+- every verdict is cached in eval_results, keyed by (eval_case_id,
   agent_version_id, output_hash).
-- In RECOIL_DEMO_MODE the runner reads the cache first and only invokes the
-  agent/judge on a true miss, so the scripted demo path is fully cached and
-  network-free. Outside demo mode, judging is live.
+- in RECOIL_DEMO_MODE we read the cache first and only hit the agent/judge on
+  a real miss, so the demo path is fully cached and offline. outside demo mode
+  judging is live.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def judge_case(
     use_cache: Optional[bool] = None,
     live_agent: bool = False,
 ) -> dict[str, Any]:
-    """Evaluate one case for one version. Returns the eval_result dict."""
+    """judge one case for one version. returns the eval_result dict."""
     use_cache = config.DEMO_MODE if use_cache is None else use_cache
 
     if use_cache:
@@ -79,8 +79,8 @@ def run_suite_for_version(
     live_agent: bool = False,
     on_case: Optional[Callable[[dict[str, Any], dict[str, Any]], None]] = None,
 ) -> list[dict[str, Any]]:
-    """Run every active case for a version; returns the list of eval_results.
-    on_case(case, result) fires after each case (used by SSE streaming)."""
+    """run every active case for a version; returns the list of eval_results.
+    on_case(case, result) fires after each case (used by sse streaming)."""
     results = []
     for case in db.list_eval_cases(conn, status="active"):
         result = judge_case(
@@ -99,7 +99,7 @@ def iter_suite_for_version(
     use_cache: Optional[bool] = None,
     live_agent: bool = False,
 ) -> Iterator[tuple[dict[str, Any], dict[str, Any]]]:
-    """Generator variant for streaming: yields (case, result) pairs."""
+    """generator version for streaming: yields (case, result) pairs."""
     for case in db.list_eval_cases(conn, status="active"):
         yield case, judge_case(conn, case, version, use_cache=use_cache, live_agent=live_agent)
 
